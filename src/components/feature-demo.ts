@@ -4,7 +4,8 @@ import { FocusFeature } from '../features/focus-feature.js';
 import { CounterFeature } from '../features/counter-feature.js';
 import { LifecycleLoggerFeature } from '../features/lifecycle-logger-feature.js';
 import { classMap } from 'lit/directives/class-map.js';
-import type { ProvidesRegistry, FeaturesRegistry } from '../root/services/feature-manager.js';
+import type { FeaturesRegistry } from '../root/services/feature-manager.js';
+import { provide } from '../root/decorators/index.js';
 
 /**
  * <feature-demo-element>
@@ -19,6 +20,9 @@ import type { ProvidesRegistry, FeaturesRegistry } from '../root/services/featur
  * Usage:
  *   <feature-demo-element></feature-demo-element>
  */
+@provide('Focus', { class: FocusFeature, config: { makeHostFocusable: false } })
+@provide('Counter', { class: CounterFeature, config: { start: 5 } })
+@provide('LifecycleLogger', { class: LifecycleLoggerFeature })
 export class FeatureDemoElement extends CustomElement {
   // Declare feature instances and properties
   declare Focus: FocusFeature;
@@ -26,22 +30,6 @@ export class FeatureDemoElement extends CustomElement {
   declare LifecycleLogger: LifecycleLoggerFeature;
   declare hasFocus: boolean;
   declare count: number;
-
-  static override get provides(): ProvidesRegistry {
-    return {
-      Focus: { 
-        class: FocusFeature, 
-        config: { makeHostFocusable: false } 
-      },
-      Counter: { 
-        class: CounterFeature, 
-        config: { start: 5 } 
-      },
-      LifecycleLogger: { 
-        class: LifecycleLoggerFeature 
-      }
-    };
-  }
 
   static override get features(): FeaturesRegistry {
     return {

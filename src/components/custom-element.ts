@@ -1,8 +1,14 @@
 import { TemplateResult } from 'lit';
 import { LitCore } from '../root/lit-core.js';
 import { LayoutFeature, LayoutClasses } from '../features/layout-feature.js';
-import type { ProvidesRegistry } from '../root/services/feature-manager.js';
+import { provide } from '../root/decorators/index.js';
 
+/**
+ * Using the @provide decorator to register the LayoutFeature.
+ * The first argument 'Layout' becomes the feature key, and the feature
+ * instance will be attached to the component as `this.Layout` at runtime.
+ */
+@provide('Layout', { class: LayoutFeature })
 export class CustomElement extends LitCore {
   // Declare layout feature properties that will be available on the host
   declare layout: string;
@@ -10,14 +16,6 @@ export class CustomElement extends LitCore {
   declare size: string;
   declare layoutClasses: LayoutClasses;
   declare Layout: LayoutFeature;
-
-  static override get provides(): ProvidesRegistry {
-    return {
-      Layout: {
-        class: LayoutFeature
-      }
-    };
-  }
 
   /** 
    * Use this to define the layout of the component.

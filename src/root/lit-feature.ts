@@ -1,4 +1,4 @@
-import type { LitCore } from './lit-core.js';
+import type { LitCore } from './lit-core.ts';
 import type { PropertyDeclaration } from 'lit';
 
 /**

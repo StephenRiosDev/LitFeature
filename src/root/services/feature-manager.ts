@@ -1,59 +1,29 @@
 import merge from 'lodash.merge';
-import type { LitFeature, FeatureConfig, FeatureProperties } from '../lit-feature.js';
+import type { LitFeature, FeatureProperties } from '../lit-feature.js';
 import type { LitCore } from '../lit-core.js';
 import type { PropertyDeclaration } from 'lit';
+import { getInheritedDecoratorProvides, type ProvidesDecorated } from '../decorators/provide.js';
+import type { FeatureConfig } from '../types/feature-types.js';
 
-/**
- * Type for a feature class constructor
- */
-export interface FeatureClass<TConfig extends FeatureConfig = FeatureConfig> {
-  new (host: LitCore, config: TConfig): LitFeature<TConfig>;
-  properties?: FeatureProperties;
-}
+// Re-export types from feature-types for backward compatibility
+export type {
+  FeatureClass,
+  FeatureDefinition,
+  FeatureConfigEntry,
+  ProvidesRegistry,
+  FeaturesRegistry,
+  LitCoreConstructor
+} from '../types/feature-types.js';
 
-/**
- * Feature definition as provided in `static get provides()`
- */
-export interface FeatureDefinition<TConfig extends FeatureConfig = FeatureConfig> {
-  class: FeatureClass<TConfig>;
-  config?: TConfig;
-  enabled?: boolean;
-}
-
-/**
- * Feature configuration as provided in `static get features()`
- */
-export interface FeatureConfigEntry {
-  config?: FeatureConfig;
-  properties?: Record<string, PropertyDeclaration | 'disable'>;
-}
-
-/**
- * Registry of provided features
- */
-export interface ProvidesRegistry {
-  [featureName: string]: FeatureDefinition;
-}
-
-/**
- * Registry of feature configurations
- */
-export interface FeaturesRegistry {
-  [featureName: string]: FeatureConfigEntry | 'disable';
-}
-
-/**
- * Interface for LitCore constructor with static feature methods
- */
-export interface LitCoreConstructor {
-  new (): LitCore;
-  name: string;
-  provides?: ProvidesRegistry;
-  features?: FeaturesRegistry;
-  properties?: Record<string, PropertyDeclaration>;
-  _featureProperties?: Record<string, PropertyDeclaration>;
-  _featuresInitialized?: boolean;
-}
+// Import types for local use
+import type {
+  FeatureClass,
+  FeatureDefinition,
+  FeatureConfigEntry,
+  ProvidesRegistry,
+  FeaturesRegistry,
+  LitCoreConstructor
+} from '../types/feature-types.js';
 
 /**
  * Compositional service responsible for managing features and their lifecycle hooks
@@ -72,11 +42,19 @@ export class FeatureManager {
   }
 
   /**
-   * Collects features (`static get provides`) from the entire inheritance chain
+   * Collects features (`static get provides`) from the entire inheritance chain.
+   * Includes both static provides() definitions and @provide decorated fields.
    */
   static getInheritedProvides(constructor: LitCoreConstructor): ProvidesRegistry {
     const features: ProvidesRegistry = {};
     
+    // First, collect decorator-provided features
+    const decoratorProvides = getInheritedDecoratorProvides(constructor as unknown as Function & ProvidesDecorated);
+    Object.entries(decoratorProvides).forEach(([name, definition]) => {
+      features[name] = definition;
+    });
+    
+    // Then collect static provides (these take precedence over decorator provides)
     let current: LitCoreConstructor | null = constructor;
     while (current && current.name !== 'LitElement') {
       const provides = current.provides || {};
