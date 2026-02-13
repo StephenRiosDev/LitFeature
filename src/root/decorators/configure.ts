@@ -4,19 +4,19 @@ import type { PropertyDeclaration } from 'lit';
 /**
  * Symbol used to store decorator-configured features on a class
  */
-export const FEATURES_REGISTRY = Symbol('featuresRegistry');
+export const CONFIGURE_REGISTRY = Symbol('configureRegistry');
 
 /**
- * Interface for classes decorated with @feature
+ * Interface for classes decorated with @configure
  */
-export interface FeaturesDecorated {
-  [FEATURES_REGISTRY]?: FeaturesRegistry;
+export interface ConfigureDecorated {
+  [CONFIGURE_REGISTRY]?: FeaturesRegistry;
 }
 
 /**
- * Configuration options for the @feature decorator
+ * Configuration options for the @configure decorator
  */
-export interface FeatureOptions<TConfig extends FeatureConfig = FeatureConfig> {
+export interface ConfigureOptions<TConfig extends FeatureConfig = FeatureConfig> {
   /** Configuration to merge with the feature's default config */
   config?: TConfig;
   /** Property overrides or disables */
@@ -32,40 +32,40 @@ export interface FeatureOptions<TConfig extends FeatureConfig = FeatureConfig> {
  * @example
  * ```typescript
  * // Configure a feature with custom config and property overrides
- * @feature('Layout', { 
+ * @configure('Layout', { 
  *   config: { layout: 'emphasized', size: 'lg' },
  *   properties: { onDark: 'disable' }
  * })
  * 
  * // Configure with just config
- * @feature('Counter', { config: { start: 10 } })
+ * @configure('Counter', { config: { start: 10 } })
  * 
  * // Disable a feature entirely
- * @feature('Focus', 'disable')
+ * @configure('Focus', 'disable')
  * 
  * export class MyComponent extends LitCore {}
  * ```
  */
-export function feature<TConfig extends FeatureConfig = FeatureConfig>(
+export function configure<TConfig extends FeatureConfig = FeatureConfig>(
   featureName: string,
-  options: FeatureOptions<TConfig> | 'disable'
+  options: ConfigureOptions<TConfig> | 'disable'
 ) {
   return function <T extends { new (...args: unknown[]): object }>(constructor: T): T {
-    const decorated = constructor as unknown as FeaturesDecorated;
+    const decorated = constructor as unknown as ConfigureDecorated;
     
     // Ensure we have our own registry (not inherited)
-    if (!Object.prototype.hasOwnProperty.call(constructor, FEATURES_REGISTRY)) {
+    if (!Object.prototype.hasOwnProperty.call(constructor, CONFIGURE_REGISTRY)) {
       // Copy parent registry if it exists
-      const parent = Object.getPrototypeOf(constructor) as FeaturesDecorated;
-      decorated[FEATURES_REGISTRY] = parent[FEATURES_REGISTRY] 
-        ? { ...parent[FEATURES_REGISTRY] } 
+      const parent = Object.getPrototypeOf(constructor) as ConfigureDecorated;
+      decorated[CONFIGURE_REGISTRY] = parent[CONFIGURE_REGISTRY] 
+        ? { ...parent[CONFIGURE_REGISTRY] } 
         : {};
     }
     
     if (options === 'disable') {
-      decorated[FEATURES_REGISTRY]![featureName] = 'disable';
+      decorated[CONFIGURE_REGISTRY]![featureName] = 'disable';
     } else {
-      decorated[FEATURES_REGISTRY]![featureName] = options as FeatureConfigEntry;
+      decorated[CONFIGURE_REGISTRY]![featureName] = options as FeatureConfigEntry;
     }
     
     return constructor;
@@ -75,20 +75,20 @@ export function feature<TConfig extends FeatureConfig = FeatureConfig>(
 /**
  * Gets the decorator-configured features registry from a class
  */
-export function getDecoratorFeatures(constructor: Function): FeaturesRegistry {
-  const decorated = constructor as FeaturesDecorated;
-  return decorated[FEATURES_REGISTRY] || {};
+export function getDecoratorConfigurations(constructor: Function): FeaturesRegistry {
+  const decorated = constructor as ConfigureDecorated;
+  return decorated[CONFIGURE_REGISTRY] || {};
 }
 
 /**
  * Collects decorator-configured features from the entire inheritance chain
  */
-export function getInheritedDecoratorFeatures(constructor: Function): FeaturesRegistry {
+export function getInheritedDecoratorConfigurations(constructor: Function): FeaturesRegistry {
   const configs: FeaturesRegistry = {};
   
   let current: Function | null = constructor;
   while (current && current.name !== 'LitElement' && current.name !== 'LitCore') {
-    const features = getDecoratorFeatures(current);
+    const features = getDecoratorConfigurations(current);
     
     // Child class configurations take precedence (don't override if already set)
     Object.entries(features).forEach(([name, config]) => {

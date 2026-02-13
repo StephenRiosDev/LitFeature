@@ -36,12 +36,12 @@ Lit already has strong composition primitives (notably `ReactiveController`), bu
 Hosts declare features using **either** static getters or decorators (both are supported):
 
 **Static getter approach:**
-- `static get provides()` — declares which features this class makes available to itself and subclasses
-- `static get features()` — configures (or disables) inherited/provided features for this class and below
+- `static get provide()` — declares which features this class makes available to itself and subclasses
+- `static get configure()` — configures (or disables) inherited/provided features for this class and below
 
 **Decorator approach:**
-- `@provide(name, definition)` — equivalent to adding an entry in `static get provides()`
-- `@feature(name, options)` — equivalent to adding an entry in `static get features()`
+- `@provide(name, definition)` — equivalent to adding an entry in `static get provide()`
+- `@configure(name, options)` — equivalent to adding an entry in `static get configure()`
 
 This repo’s reference implementation is in `src/root`:
 
@@ -49,11 +49,35 @@ This repo’s reference implementation is in `src/root`:
 - `FeatureManager` — collects provided features/configs across the inheritance chain and instantiates features
 - `LitFeature` — base class for features; proxies feature property access to host properties
 
+## TL;DR
+
+```ts
+import { LitCore } from "./src/root/lit-core.js";
+import { provide, configure } from "./src/root/decorators/index.js";
+
+// Base button provides styling with sensible defaults
+@provide('Style', { class: StyleFeature, config: { variant: 'outlined', size: 'medium' } })
+export class BaseButton extends LitCore {}
+
+// Primary button adds ripple effect and overrides styling
+@provide('Ripple', { class: RippleFeature, config: { duration: 300 } })
+@configure('Style', { config: { variant: 'filled', size: 'large' } })
+export class PrimaryButton extends BaseButton {
+  declare Style: StyleFeature;
+  declare Ripple: RippleFeature;
+}
+```
+
+At runtime, `PrimaryButton` instances have:
+- `this.Style` — config merged to `{ variant: 'filled', size: 'large' }`
+- `this.Ripple` — newly provided ripple behavior
+- Reactive properties from both features available on the host
+
 ## How the POC works (today)
 
 ### 1) Providing a feature
 
-Provide a feature by naming it in `static get provides()` or using the `@provide` decorator:
+Provide a feature by naming it in `static get provide()` or using the `@provide` decorator:
 
 **Using static getter:**
 
@@ -62,7 +86,7 @@ import { LitCore } from "./src/root/lit-core.js";
 import { LayoutFeature } from "./src/features/layout-feature.js";
 
 export class BaseElement extends LitCore {
-  static get provides() {
+  static get provide() {
     return {
       Layout: {
         class: LayoutFeature,
@@ -89,13 +113,13 @@ export class BaseElement extends LitCore {}
 
 ### 2) Configuring a provided feature
 
-Subclasses can override configuration via `static get features()` or the `@feature` decorator:
+Subclasses can override configuration via `static get configure()` or the `@configure` decorator:
 
 **Using static getter:**
 
 ```js
 export class FancyElement extends BaseElement {
-  static get features() {
+  static get configure() {
     return {
       Layout: {
         config: { layout: "emphasized", shape: "rounded" }
@@ -108,9 +132,9 @@ export class FancyElement extends BaseElement {
 **Using decorator:**
 
 ```ts
-import { feature } from "./src/root/decorators/index.js";
+import { configure } from "./src/root/decorators/index.js";
 
-@feature('Layout', { config: { layout: "emphasized", shape: "rounded" } })
+@configure('Layout', { config: { layout: "emphasized", shape: "rounded" } })
 export class FancyElement extends BaseElement {}
 ```
 
@@ -122,7 +146,7 @@ Config objects are deep-merged (this POC uses `lodash.merge`).
 
 ```js
 export class NoLayoutElement extends BaseElement {
-  static get features() {
+  static get configure() {
     return {
       Layout: "disable"
     };
@@ -133,9 +157,9 @@ export class NoLayoutElement extends BaseElement {
 **Using decorator:**
 
 ```ts
-import { feature } from "./src/root/decorators/index.js";
+import { configure } from "./src/root/decorators/index.js";
 
-@feature('Layout', 'disable')
+@configure('Layout', 'disable')
 export class NoLayoutElement extends BaseElement {}
 ```
 
@@ -147,7 +171,7 @@ Features can contribute reactive properties (via `static get properties()` on th
 
 ```js
 export class Element extends BaseElement {
-  static get features() {
+  static get configure() {
     return {
       Layout: {
         properties: {
@@ -163,9 +187,9 @@ export class Element extends BaseElement {
 **Using decorator:**
 
 ```ts
-import { feature } from "./src/root/decorators/index.js";
+import { configure } from "./src/root/decorators/index.js";
 
-@feature('Layout', { 
+@configure('Layout', { 
   config: { layout: "emphasized" },
   properties: {
     onDark: "disable",
@@ -177,15 +201,15 @@ export class Element extends BaseElement {}
 
 ### Stacking multiple decorators
 
-Multiple `@provide` and `@feature` decorators can be stacked on a single class. Decorators apply bottom-up (closest to the class first):
+Multiple `@provide` and `@configure` decorators can be stacked on a single class. Decorators apply bottom-up (closest to the class first):
 
 ```ts
-import { provide, feature } from "./src/root/decorators/index.js";
+import { provide, configure } from "./src/root/decorators/index.js";
 
 @provide('Focus', { class: FocusFeature })
 @provide('Counter', { class: CounterFeature, config: { start: 5 } })
-@feature('Layout', { config: { layout: 'emphasized' } })
-@feature('Counter', { config: { start: 10 } }) // overrides provided default
+@configure('Layout', { config: { layout: 'emphasized' } })
+@configure('Counter', { config: { start: 10 } }) // overrides provided default
 export class MyElement extends LitCore {
   declare Focus: FocusFeature;
   declare Counter: CounterFeature;
@@ -274,7 +298,7 @@ That means a “disabled-by-default, opt-in later” feature would not contribut
 
 4) **API shape is intentionally minimal**
 
-There is no formal typing, no “feature dependencies,” no ordering controls, and no explicit “feature enabled” switch in `static get features()` in the POC.
+There is no formal typing, no "feature dependencies," no ordering controls, and no explicit "feature enabled" switch in `static get configure()` in the POC.
 
 ## Relationship to existing Lit concepts
 

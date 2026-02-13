@@ -3,7 +3,7 @@ import type { LitFeature, FeatureProperties } from '../lit-feature.js';
 import type { LitCore } from '../lit-core.js';
 import type { PropertyDeclaration } from 'lit';
 import { getInheritedDecoratorProvides, type ProvidesDecorated } from '../decorators/provide.js';
-import { getInheritedDecoratorFeatures, type FeaturesDecorated } from '../decorators/feature.js';
+import { getInheritedDecoratorConfigurations, type ConfigureDecorated } from '../decorators/configure.js';
 import type { FeatureConfig } from '../types/feature-types.js';
 
 // Re-export types from feature-types for backward compatibility
@@ -43,8 +43,8 @@ export class FeatureManager {
   }
 
   /**
-   * Collects features (`static get provides`) from the entire inheritance chain.
-   * Includes both static provides() definitions and @provide decorated fields.
+   * Collects features (`static get provide`) from the entire inheritance chain.
+   * Includes both static provide() definitions and @provide decorated fields.
    */
   static getInheritedProvides(constructor: LitCoreConstructor): ProvidesRegistry {
     const features: ProvidesRegistry = {};
@@ -55,10 +55,10 @@ export class FeatureManager {
       features[name] = definition;
     });
     
-    // Then collect static provides (these take precedence over decorator provides)
+    // Then collect static provide/provides (these take precedence over decorator provides)
     let current: LitCoreConstructor | null = constructor;
     while (current && current.name !== 'LitElement') {
-      const provides = current.provides || {};
+      const provides = current.provide || current.provides || {};
       
       Object.entries(provides).forEach(([name, definition]) => {
         if (!features[name]) {
@@ -73,22 +73,22 @@ export class FeatureManager {
   }
 
   /**
-   * Collects feature configurations (`static get features`) from the inheritance chain.
-   * Includes both static features() definitions and @feature decorated configurations.
+   * Collects feature configurations (`static get configure`) from the inheritance chain.
+   * Includes both static configure() definitions and @configure decorated configurations.
    */
   static getInheritedConfigs(constructor: LitCoreConstructor): FeaturesRegistry {
     const configs: FeaturesRegistry = {};
 
     // First, collect decorator-configured features
-    const decoratorFeatures = getInheritedDecoratorFeatures(constructor as unknown as Function & FeaturesDecorated);
-    Object.entries(decoratorFeatures).forEach(([name, config]) => {
+    const decoratorConfigurations = getInheritedDecoratorConfigurations(constructor as unknown as Function & ConfigureDecorated);
+    Object.entries(decoratorConfigurations).forEach(([name, config]) => {
       configs[name] = config;
     });
 
-    // Then collect static features (merge with decorator configs)
+    // Then collect static configure/features (merge with decorator configs)
     let current: LitCoreConstructor | null = constructor;
     while (current && current.name !== 'LitElement') {
-      const features = current.features || {};
+      const features = current.configure || current.features || {};
 
       Object.entries(features).forEach(([name, config]) => {
         if (!configs[name]) {

@@ -11,7 +11,7 @@ export interface FeatureClass<TConfig extends FeatureConfig = FeatureConfig> {
 }
 
 /**
- * Feature definition as provided in `static get provides()`
+ * Feature definition as provided in `static get provide()`
  */
 export interface FeatureDefinition<TConfig extends FeatureConfig = FeatureConfig> {
   class: FeatureClass<TConfig>;
@@ -20,7 +20,7 @@ export interface FeatureDefinition<TConfig extends FeatureConfig = FeatureConfig
 }
 
 /**
- * Feature configuration as provided in `static get features()`
+ * Feature configuration as provided in `static get configure()`
  */
 export interface FeatureConfigEntry {
   config?: FeatureConfig;
@@ -47,7 +47,11 @@ export interface FeaturesRegistry {
 export interface LitCoreConstructor {
   new (): LitCore;
   name: string;
+  provide?: ProvidesRegistry;
+  configure?: FeaturesRegistry;
+  /** @deprecated Use `provide` instead */
   provides?: ProvidesRegistry;
+  /** @deprecated Use `configure` instead */
   features?: FeaturesRegistry;
   properties?: Record<string, PropertyDeclaration>;
   _featureProperties?: Record<string, PropertyDeclaration>;

@@ -4,7 +4,7 @@ import { FocusFeature } from '../features/focus-feature.js';
 import { CounterFeature } from '../features/counter-feature.js';
 import { LifecycleLoggerFeature } from '../features/lifecycle-logger-feature.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { provide, feature } from '../root/decorators/index.js';
+import { provide, configure } from '../root/decorators/index.js';
 
 /**
  * <feature-demo-element>
@@ -22,18 +22,18 @@ import { provide, feature } from '../root/decorators/index.js';
 @provide('Focus', { class: FocusFeature, config: { makeHostFocusable: false } })
 @provide('Counter', { class: CounterFeature, config: { start: 5 } })
 @provide('LifecycleLogger', { class: LifecycleLoggerFeature })
-@feature('Layout', { 
+@configure('Layout', { 
   config: { layout: 'emphasized', shape: 'rounded', size: 'lg', onDark: false },
   properties: { onDark: 'disable' }
 })
-@feature('Focus', { 
+@configure('Focus', { 
   config: { 
     onFocus: () => console.log('Demo: Focused!'),
     onBlur: () => console.log('Demo: Blurred!'),
     makeHostFocusable: true 
   }
 })
-@feature('Counter', { config: { start: 10 } })
+@configure('Counter', { config: { start: 10 } })
 export class FeatureDemoElement extends CustomElement {
   // Declare feature instances and properties
   declare Focus: FocusFeature;

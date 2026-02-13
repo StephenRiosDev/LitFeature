@@ -47,7 +47,7 @@ export class LitCore extends LitElement {
    * Configuration for features this component wants to use.
    * Use 'disable' property to explicitly disable an inherited feature.
    */
-  static get features(): FeaturesRegistry {
+  static get configure(): FeaturesRegistry {
     return {};
   }
 
@@ -55,7 +55,7 @@ export class LitCore extends LitElement {
    * Registry of features provided by this component/class.
    * Each feature should include a class reference and optional default configuration.
    */
-  static get provides(): ProvidesRegistry {
+  static get provide(): ProvidesRegistry {
     return {};
   }
 
