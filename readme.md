@@ -33,10 +33,15 @@ Lit already has strong composition primitives (notably `ReactiveController`), bu
 
 ### High-level API
 
-Hosts declare features in two static getters:
+Hosts declare features using **either** static getters or decorators (both are supported):
 
+**Static getter approach:**
 - `static get provides()` — declares which features this class makes available to itself and subclasses
 - `static get features()` — configures (or disables) inherited/provided features for this class and below
+
+**Decorator approach:**
+- `@provide(name, definition)` — equivalent to adding an entry in `static get provides()`
+- `@feature(name, options)` — equivalent to adding an entry in `static get features()`
 
 This repo’s reference implementation is in `src/root`:
 
@@ -48,7 +53,9 @@ This repo’s reference implementation is in `src/root`:
 
 ### 1) Providing a feature
 
-Provide a feature by naming it in `static get provides()`:
+Provide a feature by naming it in `static get provides()` or using the `@provide` decorator:
+
+**Using static getter:**
 
 ```js
 import { LitCore } from "./src/root/lit-core.js";
@@ -67,11 +74,24 @@ export class BaseElement extends LitCore {
 }
 ```
 
+**Using decorator:**
+
+```ts
+import { LitCore } from "./src/root/lit-core.js";
+import { LayoutFeature } from "./src/features/layout-feature.js";
+import { provide } from "./src/root/decorators/index.js";
+
+@provide('Layout', { class: LayoutFeature, config: { layout: "classic" } })
+export class BaseElement extends LitCore {}
+```
+
 **Key behavior**: the feature name (e.g. `Layout`) becomes the property name on the host used to store the instance (e.g. `this.Layout`).
 
 ### 2) Configuring a provided feature
 
-Subclasses can override configuration via `static get features()`:
+Subclasses can override configuration via `static get features()` or the `@feature` decorator:
+
+**Using static getter:**
 
 ```js
 export class FancyElement extends BaseElement {
@@ -85,9 +105,20 @@ export class FancyElement extends BaseElement {
 }
 ```
 
+**Using decorator:**
+
+```ts
+import { feature } from "./src/root/decorators/index.js";
+
+@feature('Layout', { config: { layout: "emphasized", shape: "rounded" } })
+export class FancyElement extends BaseElement {}
+```
+
 Config objects are deep-merged (this POC uses `lodash.merge`).
 
 ### 3) Disabling a feature entirely
+
+**Using static getter:**
 
 ```js
 export class NoLayoutElement extends BaseElement {
@@ -99,9 +130,20 @@ export class NoLayoutElement extends BaseElement {
 }
 ```
 
+**Using decorator:**
+
+```ts
+import { feature } from "./src/root/decorators/index.js";
+
+@feature('Layout', 'disable')
+export class NoLayoutElement extends BaseElement {}
+```
+
 ### 4) Disabling or overriding feature-provided reactive properties
 
-Features can contribute reactive properties (via `static get properties()` on the feature class). Hosts can optionally disable or override those property declarations in `static get features()`:
+Features can contribute reactive properties (via `static get properties()` on the feature class). Hosts can optionally disable or override those property declarations:
+
+**Using static getter:**
 
 ```js
 export class Element extends BaseElement {
@@ -115,6 +157,38 @@ export class Element extends BaseElement {
       }
     };
   }
+}
+```
+
+**Using decorator:**
+
+```ts
+import { feature } from "./src/root/decorators/index.js";
+
+@feature('Layout', { 
+  config: { layout: "emphasized" },
+  properties: {
+    onDark: "disable",
+    size: { type: String, reflect: true }
+  }
+})
+export class Element extends BaseElement {}
+```
+
+### Stacking multiple decorators
+
+Multiple `@provide` and `@feature` decorators can be stacked on a single class. Decorators apply bottom-up (closest to the class first):
+
+```ts
+import { provide, feature } from "./src/root/decorators/index.js";
+
+@provide('Focus', { class: FocusFeature })
+@provide('Counter', { class: CounterFeature, config: { start: 5 } })
+@feature('Layout', { config: { layout: 'emphasized' } })
+@feature('Counter', { config: { start: 10 } }) // overrides provided default
+export class MyElement extends LitCore {
+  declare Focus: FocusFeature;
+  declare Counter: CounterFeature;
 }
 ```
 
