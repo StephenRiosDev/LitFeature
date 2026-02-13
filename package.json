@@ -6,14 +6,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "lit": "^3.3.0",
     "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
+    "@types/lodash.merge": "^4.6.9",
+    "typescript": "^5.7.0",
     "vite": "^7.0.3"
   }
 }
