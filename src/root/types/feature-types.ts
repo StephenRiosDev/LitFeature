@@ -42,6 +42,25 @@ export interface FeaturesRegistry {
 }
 
 /**
+ * Resolved feature instance with final configuration
+ */
+export interface ResolvedFeature {
+  name: string;
+  definition: FeatureDefinition;
+  config: FeatureConfig;
+  properties: Record<string, PropertyDeclaration>;
+}
+
+/**
+ * Immutable feature snapshot for a specific class
+ */
+export interface FeatureSnapshot {
+  properties: Record<string, PropertyDeclaration>;
+  provides: ProvidesRegistry;
+  configs: FeaturesRegistry;
+}
+
+/**
  * Interface for LitCore constructor with static feature methods
  */
 export interface LitCoreConstructor {
@@ -54,8 +73,8 @@ export interface LitCoreConstructor {
   /** @deprecated Use `configure` instead */
   features?: FeaturesRegistry;
   properties?: Record<string, PropertyDeclaration>;
-  _featureProperties?: Record<string, PropertyDeclaration>;
-  _featuresInitialized?: boolean;
+  _featureSnapshot?: FeatureSnapshot;
+  _resolvedProperties?: Record<string, PropertyDeclaration>;
 }
 
 // Re-export FeatureConfig for convenience
