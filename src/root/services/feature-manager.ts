@@ -4,7 +4,7 @@ import type { LitCore } from '../lit-core.js';
 import type { PropertyDeclaration } from 'lit';
 import { getInheritedDecoratorProvides, type ProvidesDecorated } from '../decorators/provide.js';
 import { getInheritedDecoratorConfigurations, type ConfigureDecorated } from '../decorators/configure.js';
-import type { FeatureConfig } from '../types/feature-types.js';
+import type { FeatureConfig, FeatureSnapshot } from '../types/feature-types.js';
 
 // Re-export types from feature-types for backward compatibility
 export type {
@@ -68,6 +68,8 @@ export class FeatureManager {
       
       current = Object.getPrototypeOf(current) as LitCoreConstructor | null;
     }
+
+    console.log(features);
     
     return features;
   }
@@ -131,32 +133,50 @@ export class FeatureManager {
    * This needs to be called before the element is registered.
    */
   static prepareFeatures(constructor: LitCoreConstructor): void {
-    if (constructor._featuresInitialized) {
-      return;
+    if (constructor._featureSnapshot) {
+      return; // already computed for this class
     }
 
-    if (!constructor._featureProperties) {
-      constructor._featureProperties = {};
-    }
-    
-    const providedFeatures = this.getInheritedProvides(constructor);
-    const featureConfigs = this.getInheritedConfigs(constructor);
+    // Remove the recursive call - finalize() will handle the chain
+    const parent = Object.getPrototypeOf(constructor) as LitCoreConstructor | null;
 
-    Object.entries(providedFeatures).forEach(([featureName, featureDef]) => {
-      const featureConfig = featureConfigs[featureName];
+    const parentSnapshot: FeatureSnapshot = parent?._featureSnapshot
+      ? {
+          properties: { ...parent._featureSnapshot.properties },
+          provides: { ...parent._featureSnapshot.provides },
+          configs: { ...parent._featureSnapshot.configs }
+        }
+      : {
+          properties: {},
+          provides: {},
+          configs: {}
+        };
 
-      if (featureConfig === 'disable') return;
+    const localProvides = this.getInheritedProvides(constructor);
+    const localConfigs = this.getInheritedConfigs(constructor);
+
+    const resolvedProperties = { ...parentSnapshot.properties };
+
+    Object.entries(localProvides).forEach(([featureName, featureDef]) => {
+      const featureConfig = localConfigs[featureName];
+
+      if (featureConfig === 'disable') {
+        return;
+      }
 
       const { class: FeatureClass, config: defaultConfig = {}, enabled = true } = featureDef;
-
-      if (!enabled) return;
+      if (!enabled) {
+        return;
+      }
 
       const finalConfig = !featureConfig
         ? defaultConfig
         : merge({}, defaultConfig, (featureConfig as FeatureConfigEntry).config || {});
 
-      // Merge properties: static + config properties, with 'disable' support
-      let mergedProperties: Record<string, PropertyDeclaration> = { ...(FeatureClass.properties || {}) };
+      let mergedProperties: Record<string, PropertyDeclaration> = {
+        ...(FeatureClass.properties || {})
+      };
+
       if (featureConfig && typeof featureConfig === 'object' && featureConfig.properties) {
         Object.entries(featureConfig.properties).forEach(([propName, propValue]) => {
           if (propValue === 'disable') {
@@ -167,59 +187,53 @@ export class FeatureManager {
         });
       }
 
-      // Add merged properties to the registry
       Object.entries(mergedProperties).forEach(([propName, propConfig]) => {
-        constructor._featureProperties![propName] = propConfig;
+        resolvedProperties[propName] = propConfig;
       });
     });
 
-    constructor._featuresInitialized = true;
+    const snapshot: FeatureSnapshot = {
+      properties: Object.freeze(resolvedProperties),
+      provides: Object.freeze(localProvides),
+      configs: Object.freeze(localConfigs)
+    };
+
+    Object.freeze(snapshot);
+
+    constructor._featureSnapshot = snapshot;
   }
+
+
 
   /**
    * Initialize all features that this component has opted into
    */
   private _initializeFeatures(): void {
-    const availableFeatures = FeatureManager.getInheritedProvides(this.hostConstructor);
-    const featureConfigs = FeatureManager.getInheritedConfigs(this.hostConstructor);
+    const snapshot = this.hostConstructor._featureSnapshot;
+    if (!snapshot) return;
 
-    Object.entries(availableFeatures).forEach(([featureName, featureDef]) => {
-      const featureConfig = featureConfigs[featureName];
+    const { provides, configs } = snapshot;
 
+    Object.entries(provides).forEach(([featureName, featureDef]) => {
+      const featureConfig = configs[featureName];
       if (featureConfig === 'disable') return;
-      
+
       const { class: FeatureClass, config: defaultConfig = {}, enabled = true } = featureDef;
-      
-      if (!featureConfig && !enabled) return;
-      
+      if (!enabled) return;
+
       const finalConfig = !featureConfig
         ? defaultConfig
         : merge({}, defaultConfig, (featureConfig as FeatureConfigEntry).config || {});
-      
-      // Create the feature instance
+
       const featureInstance = new FeatureClass(this.host, finalConfig as FeatureConfig);
-      
+
       this._featureInstances.set(featureName, featureInstance);
 
-      // Set the host reference on the feature instance
-      const hostRecord = this.host as unknown as Record<string, unknown>;
-      if (hostRecord[featureName]) {
-        console.warn(`Feature Warning: Property ${featureName} is already defined on the host. Attaching with '_' prefix. \nRecommended: Change feature name via provides key to avoid conflicts.`);
-      }
-      const featureKey = hostRecord[featureName] ? `_${featureName}` : featureName;
-      hostRecord[featureKey] = featureInstance;
-
-      // Register instance properties if provided
-      const instanceProps = (featureInstance as unknown as { properties?: Record<string, PropertyDeclaration & { value?: unknown }> }).properties;
-      if (instanceProps) {
-        Object.entries(instanceProps).forEach(([propName, propConfig]) => {
-          if (Object.prototype.hasOwnProperty.call(propConfig, 'value')) {
-            (this.host as unknown as Record<string, unknown>)[propName] = propConfig.value;
-          }
-        });
-      }
+      const hostRecord = this.host as Record<string, unknown>;
+      hostRecord[featureName] = featureInstance;
     });
   }
+
 
   /**
    * Process lifecycle method for all registered features

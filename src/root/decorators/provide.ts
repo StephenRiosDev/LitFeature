@@ -37,6 +37,7 @@ export function provide<TConfig extends FeatureConfig = FeatureConfig>(
   definition: FeatureDefinition<TConfig>
 ) {
   return function <T extends { new (...args: unknown[]): object }>(constructor: T): T {
+    console.log('[@provide]', 'called for', constructor.name, 'featureName:', featureName);
     const decorated = constructor as unknown as ProvidesDecorated;
     
     // Ensure we have our own registry (not inherited)
@@ -49,6 +50,8 @@ export function provide<TConfig extends FeatureConfig = FeatureConfig>(
     }
     
     decorated[PROVIDES_REGISTRY]![featureName] = definition as unknown as FeatureDefinition;
+
+    console.log(`[@provide] ${constructor.name} now provides:`, Object.keys(decorated[PROVIDES_REGISTRY]!));
     
     return constructor;
   };
@@ -71,6 +74,7 @@ export function getInheritedDecoratorProvides(constructor: Function): ProvidesRe
   let current: Function | null = constructor;
   while (current && current.name !== 'LitElement' && current.name !== 'LitCore') {
     const provides = getDecoratorProvides(current);
+    console.log(`[getInheritedDecoratorProvides] ${current.name} provides:`, Object.keys(provides));
     
     // Child class features take precedence (don't override if already set)
     Object.entries(provides).forEach(([name, definition]) => {
