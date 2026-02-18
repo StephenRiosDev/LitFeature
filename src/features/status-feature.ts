@@ -1,5 +1,6 @@
 import { LitFeature, FeatureProperties, FeatureConfig } from '../root/lit-feature.js';
 import type { LitCore } from '../root/lit-core.js';
+import { property } from '../root/decorators/feature-property.js';
 
 /**
  * Available message status types
@@ -36,7 +37,6 @@ export interface StatusStyles {
  * - Lifecycle hooks (updated)
  */
 export class StatusFeature extends LitFeature<StatusConfig> {
-  declare status: StatusType;
   declare showIcon: boolean;
   declare statusStyles: StatusStyles;
 
@@ -48,12 +48,14 @@ export class StatusFeature extends LitFeature<StatusConfig> {
     error: '✕'
   };
 
+  @property({
+    type: String,
+    attribute: 'status',
+    reflect: true
+  })
+  status: StatusType;
+
   static properties: FeatureProperties = {
-    status: {
-      type: String,
-      attribute: 'status',
-      reflect: true
-    },
     showIcon: {
       type: Boolean,
       attribute: 'show-icon',
@@ -67,10 +69,8 @@ export class StatusFeature extends LitFeature<StatusConfig> {
 
   constructor(host: LitCore, config: StatusConfig) {
     super(host, config);
-    console.log('[StatusFeature] constructor with config:', config);
-    console.log('[StatusFeature] initial properties:', this.status, 'showIcon:', this.showIcon);
-    // this.setInternalValue('status', config.defaultStatus ?? 'info');
-    // this.setInternalValue('showIcon', config.showIcon ?? true);
+    this.status = config.defaultStatus || 'info';
+    this.showIcon = config.showIcon ?? true;
     this.statusStyles = {};
     this._updateStatusStyles();
   }
