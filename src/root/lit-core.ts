@@ -1,42 +1,6 @@
 import { LitElement, PropertyDeclaration } from 'lit';
 import { FeatureManager, ProvidesRegistry, FeaturesRegistry, LitCoreConstructor } from './services/feature-manager.js';
-import { FeatureSnapshot } from './types/feature-types.js';
-
-/**
- * Global queue for deferred component registration
- * This ensures all decorators are applied before any finalization happens
- */
-const REGISTRATION_QUEUE: Array<{ ctor: LitCoreConstructor; name: string }> = [];
-let REGISTRATION_SCHEDULED = false;
-
-/**
- * Schedule deferred registration processing
- */
-function scheduleRegistration() {
-  if (REGISTRATION_SCHEDULED) return;
-  REGISTRATION_SCHEDULED = true;
-
-  // Use queueMicrotask to defer until after all current event loop tasks complete
-  // This gives all decorators time to run
-  queueMicrotask(() => {
-    processRegistrationQueue();
-  });
-}
-
-/**
- * Process all queued registrations in order
- */
-function processRegistrationQueue() {
-  console.log(`[Registration] Processing ${REGISTRATION_QUEUE.length} queued components`);
-  
-  while (REGISTRATION_QUEUE.length > 0) {
-    const { ctor, name } = REGISTRATION_QUEUE.shift()!;
-    console.log(`[Registration] Finalizing and registering ${ctor.name} as <${name}>`);
-    
-    // Now finalize and register
-    LitCore._finalizeAndRegister(ctor, name);
-  }
-}
+import { resolveFeatureSnapshot } from './feature-resolver.js';
 
 /**
  * Base class for web components with feature management capabilities.
@@ -56,11 +20,6 @@ export class LitCore extends LitElement {
    */
   static properties: Record<string, PropertyDeclaration> = {};
 
-  /**
-   * Immutable snapshot of features for this class.
-   */
-  static _featureSnapshot?: FeatureSnapshot;
-
   constructor() {
     super();
     this.featureManager = new FeatureManager(this, this.constructor as LitCoreConstructor);
@@ -68,47 +27,23 @@ export class LitCore extends LitElement {
 
   /**
    * Lit's class finalization hook.
-   * We override this to defer execution until after all decorators have run.
+   * We override this to merge feature properties into the class properties map.
    */
   static finalize(): void {
     const ctor = this as unknown as LitCoreConstructor;
+    const snapshot = resolveFeatureSnapshot(ctor);
+    const superProps = (Object.getPrototypeOf(this) as typeof LitElement)?.properties || {};
+    const ownProps = Object.prototype.hasOwnProperty.call(this, 'properties') ? this.properties : {};
 
-    // Only run if explicitly called via _finalizeAndRegister
-    // Prevent Lit from auto-finalizing before decorators complete
-    if (!(ctor as any)._explicitFinalize) {
-      console.log(`[LitCore.finalize] Skipping auto-finalize for ${ctor.name}, deferring to register()`);
-      return;
-    }
-
-    console.log(`[LitCore.finalize] Running explicit finalization for ${ctor.name}`);
-
-    // Ensure parent is finalized first
-    const parent = Object.getPrototypeOf(ctor) as LitCoreConstructor | null;
-    if (parent && parent !== LitElement && parent.name !== 'LitElement' && parent.name !== 'LitCore') {
-      if (!(parent as any)._explicitFinalize) {
-        (parent as any)._explicitFinalize = true;
-        parent.finalize();
-      }
-    }
-
-    // Now prepare features for this class
-    FeatureManager.prepareFeatures(ctor);
-
-    const snapshotProps = ctor._featureSnapshot?.properties ?? {};
-    const baseProps = this.hasOwnProperty('properties') ? this.properties : {};
-
-    const merged: Record<string, PropertyDeclaration> = {
-      ...snapshotProps,
-      ...baseProps,
+    (this as unknown as { properties: Record<string, PropertyDeclaration> }).properties = {
+      ...superProps,
+      ...snapshot.properties,
+      ...ownProps
     };
 
-    (this as any).properties = merged;
-
-    console.log(`[LitCore.finalize] ${this.name} feature snapshot properties:`, Object.keys(snapshotProps));
-
-    // Call Lit's finalization
     super.finalize();
   }
+
 
   /**
    * Configuration for features this component wants to use.
@@ -123,53 +58,14 @@ export class LitCore extends LitElement {
   static provide: ProvidesRegistry;
 
   /**
-   * Internal method called after all decorators have completed
-   * Finalizes features and registers the custom element.
-   *
-   * This walks the ENTIRE inheritance chain and ensures each class
-   * has its finalize() called so that getInheritedDecoratorProvides
-   * and getInheritedDecoratorConfigurations run at EACH level.
-   */
-  private static _finalizeAndRegister(ctor: LitCoreConstructor, name: string): void {
-    // Collect the full inheritance chain from base to current
-    const chain: LitCoreConstructor[] = [];
-    let current: LitCoreConstructor | null = ctor;
-    
-    while (current && current.name !== 'LitElement') {
-      chain.unshift(current); // Add to front (bottom-up)
-      current = Object.getPrototypeOf(current) as LitCoreConstructor | null;
-    }
-
-    console.log(`[Registration] Finalization chain for ${ctor.name}:`, chain.map(c => c.name).join(' → '));
-
-    // Now finalize EACH class in the chain from base to derived
-    // This ensures getInheritedDecoratorProvides is called at each level
-    for (const cls of chain) {
-      if (!cls._featureSnapshot) {
-        console.log(`[Registration] Calling finalize() on ${cls.name}`);
-        (cls as any)._explicitFinalize = true;
-        cls.finalize();
-      }
-    }
-
-    // Register with browser
-    customElements.define(name, ctor as any);
-  }
-
-  /**
    * Registers the component as a custom element with the browser.
-   * Queues the registration to occur after all decorators have completed.
+   * Also resolves feature metadata for the class.
    */
   static register(componentName: string): void {
     const ctor = this as unknown as LitCoreConstructor;
 
-    console.log(`[Registration] Queuing ${ctor.name} as <${componentName}>`);
-
-    // Add to queue
-    REGISTRATION_QUEUE.push({ ctor, name: componentName });
-
-    // Schedule processing of queue
-    scheduleRegistration();
+    resolveFeatureSnapshot(ctor);
+    customElements.define(componentName, ctor as unknown as CustomElementConstructor);
   }
 
   connectedCallback(): void {

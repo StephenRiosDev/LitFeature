@@ -1,8 +1,10 @@
 /**
  * Decorators for the LitFeature system
  */
-export { provide, getDecoratorProvides, getInheritedDecoratorProvides, PROVIDES_REGISTRY } from './provide.js';
-export type { ProvideDefinition, ProvidesDecorated } from './provide.js';
+export { provide } from './provide.js';
+export type { ProvideDefinition } from './provide.js';
 
-export { configure, getDecoratorConfigurations, getInheritedDecoratorConfigurations, CONFIGURE_REGISTRY } from './configure.js';
-export type { ConfigureOptions, ConfigureDecorated } from './configure.js';
+export { configure } from './configure.js';
+export type { ConfigureOptions } from './configure.js';
+
+export { FEATURE_META } from './feature-meta.js';

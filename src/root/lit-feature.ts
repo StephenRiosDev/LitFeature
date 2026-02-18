@@ -76,6 +76,8 @@ export class LitFeature<TConfig extends FeatureConfig = FeatureConfig> implement
         if (typeof (feature.host as any).requestUpdate === 'function') {
           (feature.host as any).requestUpdate(propertyName, oldValue);
         }
+
+        console.log(`[LitFeature] Property [${propertyName}] set on feature [${feature.constructor.name}]:`, newValue);
       }
     });
   }
@@ -134,7 +136,14 @@ export class LitFeature<TConfig extends FeatureConfig = FeatureConfig> implement
   updated(changedProperties: Map<PropertyKey, unknown>): void {
     const hostRecord = this.host as unknown as Record<string, unknown>;
 
-    console.log(`updated called:`, '\n', `Feature: [${this.constructor.name}]`, '\n', `Host: ${this.host.constructor.name}`, '\n', `Changed Properties:`, changedProperties, '\n', `Instance:`, this.host);
+    console.log(
+      `[LitFeature] updated called:`,
+      '\n', `Feature: [${this.constructor.name}]`, 
+      '\n', `Host: ${this.host.constructor.name}`, 
+      '\n', `Changed Properties:`, changedProperties,
+      '\n', `Current Host Values:`, Object.fromEntries(Array.from(changedProperties.keys()).map(key => [key, hostRecord[key as string]])),
+      '\n', `Instance:`, this.host
+    );
 
     changedProperties.forEach((_oldValue, propertyName) => {
       this.setInternalValue(propertyName as string, hostRecord[propertyName as string]);

@@ -1,16 +1,5 @@
-import type { FeatureConfig, FeatureDefinition, ProvidesRegistry } from '../types/feature-types.js';
-
-/**
- * Symbol used to store decorator-provided features on a class
- */
-export const PROVIDES_REGISTRY = Symbol('providesRegistry');
-
-/**
- * Interface for classes decorated with @provide
- */
-export interface ProvidesDecorated {
-  [PROVIDES_REGISTRY]?: ProvidesRegistry;
-}
+import type { FeatureConfig, FeatureDefinition } from '../types/feature-types.js';
+import { FEATURE_META, type FeatureMetaEntry } from './feature-meta.js';
 
 /**
  * Type for the feature definition value passed to @provide decorator
@@ -37,54 +26,20 @@ export function provide<TConfig extends FeatureConfig = FeatureConfig>(
   definition: FeatureDefinition<TConfig>
 ) {
   return function <T extends { new (...args: unknown[]): object }>(constructor: T): T {
-    console.log('[@provide]', 'called for', constructor.name, 'featureName:', featureName);
-    const decorated = constructor as unknown as ProvidesDecorated;
-    
-    // Ensure we have our own registry (not inherited)
-    if (!Object.prototype.hasOwnProperty.call(constructor, PROVIDES_REGISTRY)) {
-      // Copy parent registry if it exists
-      const parent = Object.getPrototypeOf(constructor) as ProvidesDecorated;
-      decorated[PROVIDES_REGISTRY] = parent[PROVIDES_REGISTRY] 
-        ? { ...parent[PROVIDES_REGISTRY] } 
-        : {};
-    }
-    
-    decorated[PROVIDES_REGISTRY]![featureName] = definition as unknown as FeatureDefinition;
+    const decorated = constructor as unknown as Record<symbol, FeatureMetaEntry[]>;
 
-    console.log(`[@provide] ${constructor.name} now provides:`, Object.keys(decorated[PROVIDES_REGISTRY]!));
-    
+    if (!Object.prototype.hasOwnProperty.call(constructor, FEATURE_META)) {
+      decorated[FEATURE_META] = [];
+    }
+
+    decorated[FEATURE_META].push({
+      kind: 'provide',
+      name: featureName,
+      definition: definition as unknown as FeatureDefinition
+    });
+
+    // console.log(`[@provide] Registered feature "${featureName}" on ${constructor.name}:`, definition);
+
     return constructor;
   };
-}
-
-/**
- * Gets the decorator-provided features registry from a class
- */
-export function getDecoratorProvides(constructor: Function): ProvidesRegistry {
-  const decorated = constructor as ProvidesDecorated;
-  return decorated[PROVIDES_REGISTRY] || {};
-}
-
-/**
- * Collects decorator-provided features from the entire inheritance chain
- */
-export function getInheritedDecoratorProvides(constructor: Function): ProvidesRegistry {
-  const features: ProvidesRegistry = {};
-  
-  let current: Function | null = constructor;
-  while (current && current.name !== 'LitElement' && current.name !== 'LitCore') {
-    const provides = getDecoratorProvides(current);
-    console.log(`[getInheritedDecoratorProvides] ${current.name} provides:`, Object.keys(provides));
-    
-    // Child class features take precedence (don't override if already set)
-    Object.entries(provides).forEach(([name, definition]) => {
-      if (!features[name]) {
-        features[name] = definition;
-      }
-    });
-    
-    current = Object.getPrototypeOf(current) as Function | null;
-  }
-  
-  return features;
 }
