@@ -14,33 +14,46 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
+      # Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
+      # Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # Type check (optional)
       - name: Type check
         run: npm run typecheck
 
+      # Build
       - name: Build
         run: npm run build
 
+      # Debug build output
+      - name: Check dist folder
+        run: |
+          echo "Dist contents:"
+          ls -R ./dist
+
+      # Configure GitHub Pages
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      # Upload artifact for deployment
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
-          path: './dist'
+          path: ./dist
 
+      # Deploy Pages
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v3
