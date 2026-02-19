@@ -1,6 +1,6 @@
 import type { FeatureConfig, FeatureConfigEntry } from '../types/feature-types.js';
 import type { PropertyDeclaration } from 'lit';
-import { FEATURE_META, type FeatureMetaEntry } from './feature-meta.js';
+import { getOrCreateFeatureMeta } from './feature-meta.js';
 
 /**
  * Configuration options for the @configure decorator
@@ -40,17 +40,11 @@ export function configure<TConfig extends FeatureConfig = FeatureConfig>(
   options: ConfigureOptions<TConfig> | 'disable'
 ) {
   return function <T extends { new (...args: unknown[]): object }>(constructor: T): T {
-    const decorated = constructor as unknown as Record<symbol, FeatureMetaEntry[]>;
-
-    if (!Object.prototype.hasOwnProperty.call(constructor, FEATURE_META)) {
-      decorated[FEATURE_META] = [];
-    }
-
-    decorated[FEATURE_META].push({
-      kind: 'configure',
-      name: featureName,
-      options: options === 'disable' ? 'disable' : (options as FeatureConfigEntry)
-    });
+    const meta = getOrCreateFeatureMeta(constructor);
+    meta.configure!.set(
+      featureName,
+      options === 'disable' ? 'disable' : (options as FeatureConfigEntry)
+    );
 
     return constructor;
   };

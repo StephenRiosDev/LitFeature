@@ -1,5 +1,5 @@
 import type { FeatureConfig, FeatureDefinition } from '../types/feature-types.js';
-import { FEATURE_META, type FeatureMetaEntry } from './feature-meta.js';
+import { getOrCreateFeatureMeta } from './feature-meta.js';
 
 /**
  * Type for the feature definition value passed to @provide decorator
@@ -26,17 +26,8 @@ export function provide<TConfig extends FeatureConfig = FeatureConfig>(
   definition: FeatureDefinition<TConfig>
 ) {
   return function <T extends { new (...args: unknown[]): object }>(constructor: T): T {
-    const decorated = constructor as unknown as Record<symbol, FeatureMetaEntry[]>;
-
-    if (!Object.prototype.hasOwnProperty.call(constructor, FEATURE_META)) {
-      decorated[FEATURE_META] = [];
-    }
-
-    decorated[FEATURE_META].push({
-      kind: 'provide',
-      name: featureName,
-      definition: definition as unknown as FeatureDefinition
-    });
+    const meta = getOrCreateFeatureMeta(constructor);
+    meta.provide!.set(featureName, definition as unknown as FeatureDefinition);
 
     // console.log(`[@provide] Registered feature "${featureName}" on ${constructor.name}:`, definition);
 

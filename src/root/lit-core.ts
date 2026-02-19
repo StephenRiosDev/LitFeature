@@ -1,6 +1,12 @@
 import { LitElement, PropertyDeclaration } from 'lit';
-import { FeatureManager, ProvidesRegistry, FeaturesRegistry, LitCoreConstructor } from './services/feature-manager.js';
-import { resolveFeatureSnapshot } from './feature-resolver.js';
+import { FeatureConfigEntry, FeatureDefinition, FeatureManager, LitCoreConstructor } from './services/feature-manager.js';
+import { resolveFeatures } from './feature-resolver.js';
+
+/**
+ * Symbol to mark classes that extend LitCore.
+ * Used by the resolver to detect when to stop walking the inheritance chain.
+ */
+export const LIT_CORE_MARKER = Symbol('litCore');
 
 /**
  * Base class for web components with feature management capabilities.
@@ -13,6 +19,11 @@ export class LitCore extends LitElement {
    * lifecycle management, and property merging.
    */
   featureManager: FeatureManager;
+
+  /**
+   * Marker to identify LitCore-based classes
+   */
+  static readonly [LIT_CORE_MARKER] = true;
 
   /**
    * Lit reactive properties for this class.
@@ -31,13 +42,13 @@ export class LitCore extends LitElement {
    */
   static finalize(): void {
     const ctor = this as unknown as LitCoreConstructor;
-    const snapshot = resolveFeatureSnapshot(ctor);
+    const resolved = resolveFeatures(ctor);
     const superProps = (Object.getPrototypeOf(this) as typeof LitElement)?.properties || {};
     const ownProps = Object.prototype.hasOwnProperty.call(this, 'properties') ? this.properties : {};
 
     (this as unknown as { properties: Record<string, PropertyDeclaration> }).properties = {
       ...superProps,
-      ...snapshot.properties,
+      ...resolved.properties,
       ...ownProps
     };
 
@@ -49,13 +60,13 @@ export class LitCore extends LitElement {
    * Configuration for features this component wants to use.
    * Use 'disable' property to explicitly disable an inherited feature.
    */
-  static configure: FeaturesRegistry;
+  static configure: Record<string, FeatureConfigEntry | 'disable'>;
 
   /**
    * Registry of features provided by this component/class.
    * Each feature should include a class reference and optional default configuration.
    */
-  static provide: ProvidesRegistry;
+  static provide: Record<string, FeatureDefinition>;
 
   /**
    * Registers the component as a custom element with the browser.
@@ -64,7 +75,7 @@ export class LitCore extends LitElement {
   static register(componentName: string): void {
     const ctor = this as unknown as LitCoreConstructor;
 
-    resolveFeatureSnapshot(ctor);
+    resolveFeatures(ctor);
     customElements.define(componentName, ctor as unknown as CustomElementConstructor);
   }
 
