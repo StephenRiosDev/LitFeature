@@ -1,6 +1,7 @@
 import type { LitCore } from './lit-core.ts';
 import type { PropertyDeclaration } from 'lit';
 import type { ReactiveController } from 'lit';
+import { DebugUtils } from './debug-utils.js';
 
 /**
  * Base interface for feature configuration objects
@@ -33,6 +34,10 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
   static properties: FeatureProperties = {};
 
   constructor(host: LitCore, config: TConfig) {
+    const featureName = this.constructor.name || 'UnnamedFeature';
+    const hostName = host.constructor.name || 'UnknownHost';
+    DebugUtils.logProperties('feature-constructor', `Constructing ${featureName} on host ${hostName}`);
+
     this.host = host;
     this.config = config;
 
@@ -43,41 +48,63 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
   }
 
   private _litFeatureInit(): void {
+    const featureName = this.constructor.name || 'UnnamedFeature';
+    DebugUtils.logProperties('feature-init', `Initializing ${featureName} - setting up property observers`);
+
     const properties = (this.constructor as typeof LitFeature).properties;
-    if (!properties) return;
+    if (!properties) {
+      DebugUtils.logProperties('feature-init-no-props', `  → ${featureName} has no properties to observe`);
+      return;
+    }
+
+    const propNames = Object.keys(properties);
+    DebugUtils.logProperties('feature-init-props-count', `  → ${featureName} has ${propNames.length} properties`, propNames);
 
     // At construction time we only define proxy accessors on the feature.
     // Actual value reconciliation (host ↔ feature) happens in firstUpdated/updated
     // when the host has finished its own setup.
     Object.keys(properties).forEach(propertyName => {
+      DebugUtils.logProperties('feature-init-observer', `    → Creating property observer for: ${propertyName}`);
       this._createPropertyObserver(propertyName);
     });
   }
 
   private _createPropertyObserver(propertyName: string): void {
+    const featureName = this.constructor.name || 'UnnamedFeature';
+    DebugUtils.logProperties('property-observer-create', `Creating property descriptor for ${featureName}.${propertyName}`);
+
     const feature = this;
     Object.defineProperty(this, propertyName, {
       configurable: true,
       enumerable: true,
       get() {
-        return feature.getInternalValue(propertyName);
+        const value = feature.getInternalValue(propertyName);
+        DebugUtils.logWiring('property-getter', `Getting ${featureName}.${propertyName}`, value);
+        return value;
       },
       set(newValue: unknown) {
         const hostRecord = feature.host as unknown as Record<string, unknown>;
         const oldValue = hostRecord[propertyName];
 
+        DebugUtils.logWiring('property-setter', `Setting ${featureName}.${propertyName}`, {
+          oldValue,
+          newValue,
+          hostName: feature.host.constructor.name || 'UnknownHost'
+        });
+
         // Feature → host: write to Lit reactive property
         hostRecord[propertyName] = newValue;
+        DebugUtils.logWiring('property-to-host', `  → Synced to host property: ${propertyName}`, newValue);
 
         // Mirror into feature internal map
         feature.setInternalValue(propertyName, newValue);
+        DebugUtils.logWiring('property-to-internal', `  → Mirrored to internal storage: ${propertyName}`);
 
         // Ensure Lit schedules an update
         if (typeof (feature.host as any).requestUpdate === 'function') {
           (feature.host as any).requestUpdate(propertyName, oldValue);
+          DebugUtils.logWiring('property-request-update', `  → Requested update for: ${propertyName}`);
         }
-
-        console.log(`[LitFeature] Property [${propertyName}] set on feature [${feature.constructor.name}]:`, newValue);
       }
     });
   }
@@ -96,18 +123,15 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
     return this._internalValues.get(propertyName);
   }
 
-  hostUpdated(): void {
-    // console.log("hostUpdated called on", this.constructor.name); 
-    // Intentionally empty: timing hook only.
-    // Host → feature sync happens via LitCore.updated → FeatureManager.processLifecycle('updated', changedProperties)
-    // which calls each feature's `updated(changedProperties)`.
-  }
-
   /**
    * Called after the host element's first update cycle (legacy hook).
    * Kept for compatibility; you can prefer `hostUpdated` for controller-style usage.
    */
   firstUpdated(_changedProperties?: Map<PropertyKey, unknown>): void {
+    const featureName = this.constructor.name || 'UnnamedFeature';
+    const hostName = this.host.constructor.name || 'UnknownHost';
+    
+    DebugUtils.logWiring('first-updated-start', `First update phase for ${featureName} (host: ${hostName})`);
 
     const featureRecord = this as unknown as Record<string, unknown>;
     const hostRecord = this.host as unknown as Record<string, unknown>;
@@ -116,17 +140,28 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
       const hostValue = hostRecord[propertyName];
       const internalValue = this.getInternalValue(propertyName);
 
+      DebugUtils.logWiring('first-updated-reconcile', `Reconciling property: ${propertyName as string}`, {
+        hostValue,
+        internalValue,
+        oldValue
+      });
+
       if (hostValue !== undefined) {
         // Host wins: copy host value into feature internal via proxy setter
+        DebugUtils.logWiring('first-updated-host-wins', `  → Host value wins for ${propertyName as string}`);
         (featureRecord as any)[propertyName] = hostValue;
       } else if (internalValue !== undefined) {
         // Feature default wins: push internal default out to host via proxy setter
+        DebugUtils.logWiring('first-updated-feature-wins', `  → Feature default wins for ${propertyName as string}`, internalValue);
         (featureRecord as any)[propertyName] = internalValue;
       } else {
         // Nothing set anywhere; just mirror whatever host currently has (likely undefined)
+        DebugUtils.logWiring('first-updated-mirror', `  → No value set, mirroring undefined for ${propertyName as string}`);
         this.setInternalValue(propertyName, hostValue);
       }
     });
+
+    DebugUtils.logWiring('first-updated-complete', `First update phase complete for ${featureName}`);
   }
 
   /**
@@ -134,20 +169,20 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
    * Sync host → feature only for properties that actually changed.
    */
   updated(changedProperties: Map<PropertyKey, unknown>): void {
+    const featureName = this.constructor.name || 'UnnamedFeature';
+    const hostName = this.host.constructor.name || 'UnknownHost';
+
+    DebugUtils.logWiring('updated-start', `Update phase for ${featureName} (host: ${hostName})`);
+
     const hostRecord = this.host as unknown as Record<string, unknown>;
 
-    console.log(
-      `[LitFeature] updated called:`,
-      '\n', `Feature: [${this.constructor.name}]`, 
-      '\n', `Host: ${this.host.constructor.name}`, 
-      '\n', `Changed Properties:`, changedProperties,
-      '\n', `Current Host Values:`, Object.fromEntries(Array.from(changedProperties.keys()).map(key => [key, hostRecord[key as string]])),
-      '\n', `Instance:`, this.host
-    );
-
     changedProperties.forEach((_oldValue, propertyName) => {
-      this.setInternalValue(propertyName as string, hostRecord[propertyName as string]);
+      const newValue = hostRecord[propertyName as string];
+      DebugUtils.logWiring('updated-sync', `Syncing changed property: ${propertyName as string}`, newValue);
+      this.setInternalValue(propertyName as string, newValue);
     });
+
+    DebugUtils.logWiring('updated-complete', `Update phase complete for ${featureName}`);
   }
 
   // Lifecycle hooks that can be overridden by subclasses
