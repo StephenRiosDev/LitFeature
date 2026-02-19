@@ -9,11 +9,11 @@ import './notification-demo.js';
  */
 @customElement('demo-page')
 export class DemoPage extends HTMLElement {
-  override connectedCallback(): void {
+  connectedCallback(): void {
     this.innerHTML = '<notification-demo></notification-demo>';
   }
 
-  override render(): TemplateResult {
+  render(): TemplateResult {
     return html`<notification-demo></notification-demo>`;
   }
 }
