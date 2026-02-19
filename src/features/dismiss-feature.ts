@@ -76,7 +76,6 @@ export class DismissFeature extends LitFeature<DismissConfig> {
     // Call before callback - can prevent dismissal
     const shouldProceed = this._onBeforeDismiss?.();
     if (shouldProceed === false) {
-      console.log('[DismissFeature] Dismiss prevented by onBeforeDismiss');
       return false;
     }
 
@@ -106,23 +105,5 @@ export class DismissFeature extends LitFeature<DismissConfig> {
         composed: true
       })
     );
-
-    console.log('[DismissFeature] Component dismissed');
-  }
-
-  /**
-   * Lifecycle: Before disconnect cleanup
-   */
-  beforeDisconnectedCallback(): void {
-    if (!this.dismissed) {
-      console.log('[DismissFeature] Component removed before dismissed');
-    }
-  }
-
-  /**
-   * Lifecycle: Log feature connection
-   */
-  connectedCallback(): void {
-    console.log(`[DismissFeature] Connected, dismissible: ${this.dismissible}`);
   }
 }

@@ -115,17 +115,9 @@ export class VisibilityFeature extends LitFeature<VisibilityConfig> {
   }
 
   /**
-   * Lifecycle: Log initial visibility state after first render
-   */
-  afterFirstUpdated(): void {
-    console.log(`[VisibilityFeature] Initial state: ${this.visible ? 'visible' : 'hidden'}`);
-  }
-
-  /**
    * Lifecycle: Cleanup on disconnect
    */
   disconnectedCallback(): void {
-    console.log('[VisibilityFeature] Disconnected, cleaning up transitions');
     this.transitioning = false;
   }
 }

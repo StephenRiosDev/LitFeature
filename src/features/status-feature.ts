@@ -108,11 +108,6 @@ export class StatusFeature extends LitFeature<StatusConfig> {
     };
   }
 
-  firstUpdated(_changedProperties?: Map<PropertyKey, unknown>): void {
-    super.firstUpdated();
-    console.log('[StatusFeature] firstUpdated with status:', this.status, 'showIcon:', this.showIcon);
-  }
-
   /**
    * Lifecycle: Update styles when properties change
    */
@@ -121,12 +116,5 @@ export class StatusFeature extends LitFeature<StatusConfig> {
     if (changedProperties.has('status') || changedProperties.has('showIcon')) {
       this._updateStatusStyles();
     }
-  }
-
-  /**
-   * Lifecycle: Log when feature connects
-   */
-  connectedCallback(): void {
-    console.log(`[StatusFeature] Connected with status: ${this.status}`);
   }
 }

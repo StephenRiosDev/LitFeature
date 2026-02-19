@@ -93,7 +93,6 @@ export class TimerFeature extends LitFeature<TimerConfig> {
     this._startTime = Date.now() - (this.duration - this.remaining);
     
     this._tick();
-    console.log(`[TimerFeature] Timer started, ${this.duration}ms`);
   }
 
   /**
@@ -109,8 +108,6 @@ export class TimerFeature extends LitFeature<TimerConfig> {
       cancelAnimationFrame(this._timerId);
       this._timerId = null;
     }
-    
-    console.log(`[TimerFeature] Timer paused at ${this.remaining}ms`);
   }
 
   /**
@@ -124,7 +121,6 @@ export class TimerFeature extends LitFeature<TimerConfig> {
     this.paused = false;
     
     this._tick();
-    console.log('[TimerFeature] Timer resumed');
   }
 
   /**
@@ -134,7 +130,6 @@ export class TimerFeature extends LitFeature<TimerConfig> {
     this.stop();
     this.remaining = this.duration;
     this.progress = 0;
-    console.log('[TimerFeature] Timer reset');
   }
 
   /**
@@ -187,20 +182,11 @@ export class TimerFeature extends LitFeature<TimerConfig> {
       })
     );
 
-    console.log('[TimerFeature] Timer complete');
-
     // Auto-dismiss if configured
     if (this._autoDismiss) {
       const dismissFeature = (this.host as unknown as { Dismiss?: { dismiss: () => void } }).Dismiss;
       dismissFeature?.dismiss();
     }
-  }
-
-  /**
-   * Lifecycle: Prepare before connection
-   */
-  beforeConnectedCallback(): void {
-    console.log('[TimerFeature] Preparing timer...');
   }
 
   /**
@@ -220,6 +206,5 @@ export class TimerFeature extends LitFeature<TimerConfig> {
    */
   disconnectedCallback(): void {
     this.stop();
-    console.log('[TimerFeature] Disconnected, timer cleaned up');
   }
 }

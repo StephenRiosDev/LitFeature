@@ -35,8 +35,6 @@ export function property(options: PropertyDeclaration = {}) {
     }
     
     ctor.properties[propertyKey] = options;
-    
-    console.log(`[featureProperty] Registered "${propertyKey}" on ${ctor.name}:`, options, '\nCtor:', ctor);
   };
 }
 

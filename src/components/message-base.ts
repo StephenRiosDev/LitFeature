@@ -84,21 +84,6 @@ export class MessageBase extends LitCore {
     }
   `;
 
-  firstUpdated(_changedProperties?: Map<PropertyKey, unknown>): void {
-    super.firstUpdated(_changedProperties ?? new Map());
-    console.log('[MessageBase] firstUpdated with status:', this.status, 'showIcon:', this.showIcon);
-  }
-
-  updated(changedProperties: Map<PropertyKey, unknown>): void {
-    super.updated(changedProperties);
-    console.log('[MessageBase] updated with status:', this.status, 'showIcon:', this.showIcon);
-  }
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    console.log(`[MessageBase] Connected with status: ${this.status}, showIcon: ${this.showIcon}`);
-  }
-
   /**
    * Render the message content (to be overridden by subclasses)
    */

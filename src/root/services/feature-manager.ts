@@ -2,6 +2,7 @@ import merge from 'lodash.merge';
 import type { LitFeature } from '../lit-feature.js';
 import type { LitCore } from '../lit-core.js';
 import { resolveFeatures } from '../feature-resolver.js';
+import { DebugUtils } from '../debug-utils.js';
 import type { FeatureConfig, LitCoreConstructor, ResolvedFeatures } from '../types/feature-types.js';
 
 // Re-export types for backward compatibility (deprecated)
@@ -41,8 +42,16 @@ export class FeatureManager {
    * Initialize all features from resolved state
    */
   private _initializeFeatures(resolved: ResolvedFeatures): void {
+    const hostName = (this.host as any).constructor?.name || 'Unknown';
+    DebugUtils.logProperties('init-start', `Starting feature instantiation for host: ${hostName}`, { 
+      featureCount: resolved.features.size 
+    });
+
     resolved.features.forEach((feature, featureName) => {
+      DebugUtils.logProperties('init-feature', `Instantiating feature: ${featureName}`);
+
       const featureInstance = new (feature.class as any)(this.host, feature.config);
+      DebugUtils.logProperties('init-instance-created', `  → Instance created for: ${featureName}`);
 
       this._featureInstances.set(featureName, featureInstance);
 
@@ -54,11 +63,15 @@ export class FeatureManager {
 Features should not declare properties with names matching those in the host component. Please rename the feature or host property to avoid this conflict.
 Feature will be assigned to _${featureName} to avoid overwriting the host property. It is not recommended to leave this conflict unresolved, as it may lead to unexpected behavior.`
         );
+        DebugUtils.logProperties('init-attach-conflict', `  → Conflict detected, attaching to _${featureName}`);
         hostRecord[`_${featureName}`] = featureInstance;
       } else {
+        DebugUtils.logProperties('init-attach', `  → Attached to host as property: ${featureName}`);
         hostRecord[featureName] = featureInstance;
       }
     });
+
+    DebugUtils.logProperties('init-complete', `Feature instantiation complete for host: ${hostName}`);
   }
 
   /**

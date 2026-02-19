@@ -29,8 +29,6 @@ export function provide<TConfig extends FeatureConfig = FeatureConfig>(
     const meta = getOrCreateFeatureMeta(constructor);
     meta.provide!.set(featureName, definition as unknown as FeatureDefinition);
 
-    // console.log(`[@provide] Registered feature "${featureName}" on ${constructor.name}:`, definition);
-
     return constructor;
   };
 }
