@@ -33,15 +33,15 @@ Lit already has strong composition primitives (notably `ReactiveController`), bu
 
 ### High-level API
 
-Hosts declare features using **either** static getters or decorators (both are supported):
+Hosts declare features using **either** static properties or decorators (both are supported):
 
-**Static getter approach:**
-- `static get provides()` — declares which features this class makes available to itself and subclasses
-- `static get features()` — configures (or disables) inherited/provided features for this class and below
+**Static property approach:**
+- `static provide` — object declaring which features this class makes available to itself and subclasses
+- `static configure` — object configuring (or disabling) inherited/provided features for this class and below
 
 **Decorator approach:**
-- `@provide(name, definition)` — equivalent to adding an entry in `static get provides()`
-- `@configure(name, options)` — equivalent to adding an entry in `static get features()`
+- `@provide(name, definition)` — equivalent to adding an entry in `static provide`
+- `@configure(name, options)` — equivalent to adding an entry in `static configure`
 
 This repo’s reference implementation is in `src/root`:
 
@@ -53,7 +53,7 @@ This repo’s reference implementation is in `src/root`:
 
 ```ts
 import { LitCore } from "./src/root/lit-core.js";
-import { provide, feature } from "./src/root/decorators/index.js";
+import { provide, configure } from "./src/root/decorators/index.js";
 
 // Base button provides styling with sensible defaults
 @provide('Style', { class: StyleFeature, config: { variant: 'outlined', size: 'medium' } })
@@ -77,24 +77,21 @@ At runtime, `PrimaryButton` instances have:
 
 ### 1) Providing a feature
 
-Provide a feature by naming it in `static get provides()` or using the `@provide` decorator:
+Provide a feature using either static properties or decorators:
 
-**Using static getter:**
+**Using static property:**
 
-```js
+```ts
 import { LitCore } from "./src/root/lit-core.js";
 import { LayoutFeature } from "./src/features/layout-feature.js";
 
 export class BaseElement extends LitCore {
-  static get provides() {
-    return {
-      Layout: {
-        class: LayoutFeature,
-        config: { layout: "classic" }, // optional defaults
-        enabled: true // optional; defaults to true
-      }
-    };
-  }
+  static provide = {
+    Layout: {
+      class: LayoutFeature,
+      config: { layout: "classic" }
+    }
+  };
 }
 ```
 
@@ -111,21 +108,21 @@ export class BaseElement extends LitCore {}
 
 **Key behavior**: the feature name (e.g. `Layout`) becomes the property name on the host used to store the instance (e.g. `this.Layout`).
 
+It is recommended to capitalize the first letter of this name to indicate throughout the code that this is a reference to an instance of a feature.
+
 ### 2) Configuring a provided feature
 
-Subclasses can override configuration via `static get features()` or the `@configure` decorator:
+Subclasses can override configuration using either approach:
 
-**Using static getter:**
+**Using static property:**
 
-```js
+```ts
 export class FancyElement extends BaseElement {
-  static get features() {
-    return {
-      Layout: {
-        config: { layout: "emphasized", shape: "rounded" }
-      }
-    };
-  }
+  static configure = {
+    Layout: {
+      config: { layout: "emphasized", shape: "rounded" }
+    }
+  };
 }
 ```
 
@@ -142,15 +139,13 @@ Config objects are deep-merged (this POC uses `lodash.merge`).
 
 ### 3) Disabling a feature entirely
 
-**Using static getter:**
+**Using static property:**
 
-```js
+```ts
 export class NoLayoutElement extends BaseElement {
-  static get features() {
-    return {
-      Layout: "disable"
-    };
-  }
+  static configure = {
+    Layout: 'disable'
+  };
 }
 ```
 
@@ -167,20 +162,18 @@ export class NoLayoutElement extends BaseElement {}
 
 Features can contribute reactive properties (via `static get properties()` on the feature class). Hosts can optionally disable or override those property declarations:
 
-**Using static getter:**
+**Using static property:**
 
-```js
+```ts
 export class Element extends BaseElement {
-  static get features() {
-    return {
-      Layout: {
-        properties: {
-          onDark: "disable", // remove this property from the host
-          size: { type: String, reflect: true } // override metadata
-        }
+  static configure = {
+    Layout: {
+      properties: {
+        onDark: "disable",
+        size: { type: String, reflect: true }
       }
-    };
-  }
+    }
+  };
 }
 ```
 
@@ -288,7 +281,7 @@ The intent described by the API is “subclasses override ancestors.” The curr
 
 2) **Disabled-by-default features and property preparation**
 
-The POC prepares feature-contributed reactive properties at `register()` time (`FeatureManager.prepareFeatures()`), before instances exist. In the current implementation, properties are only prepared for features whose `provides` entry is `enabled: true`.
+The POC prepares feature-contributed reactive properties at finalization time, before instances exist. In the current implementation, properties are only prepared for features that are provided (not disabled).
 
 That means a “disabled-by-default, opt-in later” feature would not contribute reactive properties unless the host class enables it up-front.
 
@@ -298,7 +291,7 @@ That means a “disabled-by-default, opt-in later” feature would not contribut
 
 4) **API shape is intentionally minimal**
 
-There is no formal typing, no “feature dependencies,” no ordering controls, and no explicit “feature enabled” switch in `static get features()` in the POC.
+There is no formal typing, no "feature dependencies," no ordering controls, and limited metadata available at runtime in this POC.
 
 ## Relationship to existing Lit concepts
 

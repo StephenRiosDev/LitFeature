@@ -106,14 +106,14 @@ export function resolveFeatures(ctor: LitCoreConstructor): ResolvedFeatures {
   const chain = getInheritanceChain(ctor);
 
   chain.forEach(current => {
-    // Collect from static getters (provide/provides)
-    const staticProvides = current.provide || current.provides || {};
+    // Collect from static getters (provide)
+    const staticProvides = current.provide || {};
     Object.entries(staticProvides).forEach(([name, definition]) => {
       provides.set(name, definition);
     });
 
-    // Collect from static getters (configure/features)
-    const staticConfigs = current.configure || current.features || {};
+    // Collect from static getters (configure)
+    const staticConfigs = current.configure || {};
     Object.entries(staticConfigs).forEach(([name, config]) => {
       const nextConfig = config as FeatureConfigEntry | 'disable';
       const merged = mergeConfigEntries(configs.get(name), nextConfig);

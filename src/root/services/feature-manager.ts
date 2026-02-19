@@ -26,12 +26,10 @@ export type {
  */
 export class FeatureManager {
   host: LitCore;
-  hostConstructor: LitCoreConstructor;
   private _featureInstances: Map<string, LitFeature>;
 
   constructor(host: LitCore, constructor: LitCoreConstructor) {
     this.host = host;
-    this.hostConstructor = constructor;
     this._featureInstances = new Map();
     
     // Resolve and initialize features
