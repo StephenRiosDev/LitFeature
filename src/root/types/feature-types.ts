@@ -11,7 +11,7 @@ export interface FeatureClass<TConfig extends FeatureConfig = FeatureConfig> {
 }
 
 /**
- * Feature definition as provided in `static get provide()`
+ * Feature definition as provided in `static get provide()` or decorators
  */
 export interface FeatureDefinition<TConfig extends FeatureConfig = FeatureConfig> {
   class: FeatureClass<TConfig>;
@@ -20,44 +20,43 @@ export interface FeatureDefinition<TConfig extends FeatureConfig = FeatureConfig
 }
 
 /**
- * Feature configuration as provided in `static get configure()`
+ * Feature configuration entry for overrides
  */
 export interface FeatureConfigEntry {
   config?: FeatureConfig;
   properties?: Record<string, PropertyDeclaration | 'disable'>;
 }
 
-/**
- * Registry of provided features
- */
-export interface ProvidesRegistry {
-  [featureName: string]: FeatureDefinition;
-}
+// ============================================================================
+// CORE CONCEPT #1: Class-Level Metadata (raw decorators)
+// ============================================================================
 
 /**
- * Registry of feature configurations
+ * Class-level metadata attached to components via decorators or static getters.
+ * This is the raw, unresolved state before inheritance merging.
  */
-export interface FeaturesRegistry {
-  [featureName: string]: FeatureConfigEntry | 'disable';
+export interface FeatureMeta {
+  provide?: Map<string, FeatureDefinition>;
+  configure?: Map<string, FeatureConfigEntry | 'disable'>;
+  featureProperties?: Map<string, PropertyDeclaration>;
 }
 
+// ============================================================================
+// CORE CONCEPT #2: Resolved Snapshot (final merged state)
+// ============================================================================
+
 /**
- * Resolved feature instance with final configuration
+ * Final resolved state after merging inheritance chain.
+ * This is the only thing FeatureManager needs.
  */
-export interface ResolvedFeature {
-  name: string;
-  definition: FeatureDefinition;
-  config: FeatureConfig;
+export interface ResolvedFeatures {
+  /** All properties from all enabled features */
   properties: Record<string, PropertyDeclaration>;
-}
-
-/**
- * Immutable feature snapshot for a specific class
- */
-export interface FeatureSnapshot {
-  properties: Record<string, PropertyDeclaration>;
-  provides: ProvidesRegistry;
-  configs: FeaturesRegistry;
+  /** All enabled features with their final config */
+  features: Map<string, {
+    class: typeof LitFeature;
+    config: FeatureConfig;
+  }>;
 }
 
 /**
@@ -66,14 +65,14 @@ export interface FeatureSnapshot {
 export interface LitCoreConstructor {
   new (): LitCore;
   name: string;
-  provide?: ProvidesRegistry;
-  configure?: FeaturesRegistry;
+  provide?: Record<string, FeatureDefinition>;
+  configure?: Record<string, FeatureConfigEntry | 'disable'>;
   /** @deprecated Use `provide` instead */
-  provides?: ProvidesRegistry;
+  provides?: Record<string, FeatureDefinition>;
   /** @deprecated Use `configure` instead */
-  features?: FeaturesRegistry;
+  features?: Record<string, FeatureConfigEntry | 'disable'>;
   properties?: Record<string, PropertyDeclaration>;
-  _featureSnapshot?: FeatureSnapshot;
+  _resolvedFeatures?: ResolvedFeatures;
   _resolvedProperties?: Record<string, PropertyDeclaration>;
 }
 

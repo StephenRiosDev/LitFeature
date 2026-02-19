@@ -5,8 +5,8 @@ export type {
   FeatureClass,
   FeatureDefinition,
   FeatureConfigEntry,
-  ProvidesRegistry,
-  FeaturesRegistry,
+  FeatureMeta,
+  ResolvedFeatures,
   LitCoreConstructor,
   FeatureConfig
 } from './feature-types.js';

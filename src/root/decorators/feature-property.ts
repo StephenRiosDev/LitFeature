@@ -1,14 +1,9 @@
 import type { PropertyDeclaration } from 'lit';
-
-export const FEATURE_PROPERTIES_META = Symbol('featurePropertiesMeta');
-
-export interface FeaturePropertyMeta {
-  [propertyName: string]: PropertyDeclaration;
-}
+import { FEATURE_META, getOrCreateFeatureMeta } from './feature-meta.js';
 
 /**
  * Decorator for defining reactive properties on feature classes.
- * Works like Lit's @property but stores metadata for later resolution.
+ * Works like Lit's @property but stores metadata in the unified FEATURE_META symbol.
  * 
  * @example
  * ```typescript
@@ -23,16 +18,9 @@ export function property(options: PropertyDeclaration = {}) {
     // For field decorators, target is the prototype
     const ctor = target.constructor;
 
-    // 1. Store metadata for the resolver (used when merging into host properties)
-    if (!Object.prototype.hasOwnProperty.call(ctor, FEATURE_PROPERTIES_META)) {
-      Object.defineProperty(ctor, FEATURE_PROPERTIES_META, {
-        value: {},
-        writable: true,
-        configurable: true,
-        enumerable: false
-      });
-    }
-    (ctor as any)[FEATURE_PROPERTIES_META][propertyKey] = options;
+    // 1. Store in unified FEATURE_META for resolver
+    const meta = getOrCreateFeatureMeta(ctor);
+    meta.featureProperties!.set(propertyKey, options);
     
     // 2. ALSO add to the feature class's own static properties
     //    This is needed for _litFeatureInit() to create the property proxy
@@ -54,6 +42,18 @@ export function property(options: PropertyDeclaration = {}) {
 /**
  * Extract @featureProperty metadata from a feature class
  */
-export function getFeaturePropertyMetadata(ctor: any): FeaturePropertyMeta {
-  return (ctor as any)[FEATURE_PROPERTIES_META] || {};
+export function getFeaturePropertyMetadata(ctor: any): Record<string, PropertyDeclaration> {
+  const meta = (ctor as any)[FEATURE_META];
+  if (!meta || !meta.featureProperties) {
+    return {};
+  }
+  
+  const result: Record<string, PropertyDeclaration> = {};
+  meta.featureProperties.forEach((value: PropertyDeclaration, key: string) => {
+    result[key] = value;
+  });
+  return result;
 }
+
+/** @deprecated Use FEATURE_META instead */
+export const FEATURE_PROPERTIES_META = Symbol('featurePropertiesMeta');
