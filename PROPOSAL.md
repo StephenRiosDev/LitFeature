@@ -23,6 +23,7 @@ A **Feature** is a specialized `ReactiveController` that:
 2. **Declares reactive properties** - properties that merge into the host's property system
 3. **Encapsulates single-responsibility behavior** - dismissal, timing, status management, etc.
 4. **Is inheritable and configurable** - subclasses can reconfigure or disable features
+5. **Supports standard JavaScript class inheritance** - features can extend other feature classes or base classes, inheriting properties and methods for more granular control
 
 ### Key Principles
 
@@ -31,8 +32,58 @@ A **Feature** is a specialized `ReactiveController` that:
 3. **Property Integration**: Feature properties become host properties automatically
 4. **Single Responsibility**: Each feature manages one concern (status, visibility, timer, dismissal)
 5. **Inter-Feature Communication**: Features can discover and communicate with other features on the same host
+6. **Class-Based Extensibility**: Features leverage standard JavaScript class inheritance, allowing custom feature subclasses with specialized properties and methods for more granular control
+
+### Feature Class Inheritance
+
+Features support standard JavaScript class inheritance, enabling developers to create feature subclasses that extend base features with specialized properties and methods. This provides another vector for fine-grained control while maintaining all the benefits of the feature system.
+
+**Example: Extending StatusFeature**
+
+```typescript
+// Base feature in library
+export class StatusFeature extends LitFeature {
+  @property({ type: String, reflect: true })
+  status: StatusType = 'info';
+  
+  getStatusIcon(): string { /* ... */ }
+  getStatusColor(): string { /* ... */ }
+}
+
+// Custom subclass in application code
+export class ExtendedStatusFeature extends StatusFeature {
+  @property({ type: Boolean })
+  showStatusLabel: boolean = false;
+  
+  // Extended method with custom behavior
+  getStatusIcon(): string {
+    const baseIcon = super.getStatusIcon();
+    return this.showStatusLabel ? `${baseIcon} ${this.status}` : baseIcon;
+  }
+  
+  // New method specific to extended feature
+  getStatusHeight(): number {
+    return this.showStatusLabel ? 'large' : 'small';
+  }
+}
+
+// Use custom feature in component
+@provide('Status', { class: ExtendedStatusFeature })
+class CustomMessageBox extends LitCore {
+  declare Status: ExtendedStatusFeature;
+  declare status: string;
+  declare showStatusLabel: boolean;
+}
+```
+
+**Benefits of Feature Inheritance:**
+- **Composition over duplication** - Subclass features reuse base feature logic rather than duplicating it
+- **Specialized variants** - Create custom feature variants for specific use cases without modifying the base feature
+- **Gradual enhancement** - Layer functionality by extending existing features incrementally
+- **Maintains integration** - Feature properties and lifecycle management work seamlessly in subclasses
 
 ## Features in the Codebase
+
 
 This POC implements four example features that demonstrate the pattern:
 

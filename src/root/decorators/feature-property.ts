@@ -24,9 +24,10 @@ export function property(options: PropertyDeclaration = {}) {
     
     // 2. ALSO add to the feature class's own static properties
     //    This is needed for _litFeatureInit() to create the property proxy
+    const parentProperties = ctor.properties || {}; // Get inherited or empty
     if (!Object.prototype.hasOwnProperty.call(ctor, 'properties')) {
       Object.defineProperty(ctor, 'properties', {
-        value: {},
+        value: {...parentProperties},
         writable: true,
         configurable: true,
         enumerable: false
