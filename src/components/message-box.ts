@@ -102,7 +102,7 @@ export class MessageBox extends MessageBase {
     }
 
     const statusClass = `status-${this.status || 'info'}`;
-     const transitionStyle = this.Visibility?.visible ? this.Visibility.getTransitionStyles() || '' : '';
+    const transitionStyle = this.Visibility?.visible ? this.Visibility.getTransitionStyles() || '' : '';
     
     return html`
       <div 
