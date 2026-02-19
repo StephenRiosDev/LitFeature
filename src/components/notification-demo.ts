@@ -36,108 +36,126 @@ export class NotificationDemo extends LitElement {
   static override styles: CSSResultGroup = css`
     :host {
       display: block;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 24px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      width: 100%;
     }
 
     h1 {
-      font-size: 28px;
-      font-weight: 600;
-      margin: 0 0 8px;
-      color: #1a1a1a;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0 0 12px;
+      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
     }
 
     h2 {
-      font-size: 20px;
-      font-weight: 600;
-      margin: 32px 0 16px;
-      color: #333;
-      border-bottom: 2px solid #e0e0e0;
-      padding-bottom: 8px;
+      font-size: 28px;
+      font-weight: 700;
+      margin: 40px 0 20px;
+      color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .subtitle {
-      color: #666;
-      margin: 0 0 32px;
+      color: #a0a0a0;
+      margin: 0 0 40px;
+      font-size: 18px;
     }
 
     .section {
-      margin-bottom: 32px;
+      margin-bottom: 40px;
+      background: #1f1f1f;
+      border: 1px solid #404040;
+      border-radius: 12px;
+      padding: 32px;
     }
 
     .demo-grid {
       display: grid;
-      gap: 16px;
+      gap: 20px;
     }
 
     .demo-row {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       flex-wrap: wrap;
       align-items: center;
     }
 
     .level-badge {
-      display: inline-block;
-      background: #333;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4d64ff 0%, rgba(77, 100, 255, 0.6) 100%);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 6px;
       font-size: 12px;
-      font-weight: 600;
-      margin-right: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .code {
-      font-family: 'SF Mono', Monaco, monospace;
-      background: #f5f5f5;
-      padding: 2px 6px;
-      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      background: rgba(77, 100, 255, 0.1);
+      color: #90ffff;
+      padding: 4px 10px;
+      border-radius: 6px;
       font-size: 13px;
+      border: 1px solid rgba(144, 255, 255, 0.2);
     }
 
     button {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
+      background: linear-gradient(135deg, #4d64ff 0%, rgba(77, 100, 255, 0.8) 100%);
+      color: #fff;
+      border: 2px solid #4d64ff;
+      padding: 10px 20px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
-      transition: background 0.2s;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     button:hover {
-      background: #555;
+      background: linear-gradient(135deg, #5d74ff 0%, rgba(77, 100, 255, 0.9) 100%);
+      transform: translateY(-1px);
     }
 
-    button.secondary {
-      background: #e0e0e0;
-      color: #333;
-    }
-
-    button.secondary:hover {
-      background: #d0d0d0;
+    button:active {
+      transform: translateY(0);
     }
 
     .hierarchy-diagram {
-      background: #f9f9f9;
-      border: 1px solid #e0e0e0;
+      background: #2a2a2a;
+      border: 1px solid #404040;
       border-radius: 8px;
-      padding: 16px;
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: 13px;
-      line-height: 1.8;
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 2;
+      color: #e0e0e0;
     }
 
     .hierarchy-diagram .provides {
-      color: #2e7d32;
+      color: #90ffff;
+      font-weight: 600;
     }
 
     .hierarchy-diagram .configures {
-      color: #1565c0;
+      color: #4d64ff;
+      font-weight: 600;
+    }
+
+    .hierarchy-diagram strong {
+      color: #fff;
     }
 
     .toast-container {
@@ -151,12 +169,24 @@ export class NotificationDemo extends LitElement {
     }
 
     .feature-list {
-      margin: 8px 0;
-      padding-left: 20px;
+      margin: 16px 0;
+      padding-left: 24px;
     }
 
     .feature-list li {
-      margin: 4px 0;
+      margin: 12px 0;
+      color: #a0a0a0;
+      line-height: 1.8;
+    }
+
+    .feature-list strong {
+      color: #e0e0e0;
+    }
+
+    p {
+      color: #a0a0a0;
+      line-height: 1.8;
+      margin: 0 0 20px 0;
     }
   `;
 

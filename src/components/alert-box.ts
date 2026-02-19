@@ -49,27 +49,34 @@ export class AlertBox extends MessageBox {
     css`
       .alert-box {
         position: relative;
-        padding-right: 40px; /* Make room for close button */
+        padding-right: 44px;
       }
 
       .dismiss-button {
         position: absolute;
         top: 50%;
-        right: 8px;
+        right: 12px;
         transform: translateY(-50%);
-        background: none;
+        background: rgba(255, 255, 255, 0.08);
         border: none;
         padding: 4px 8px;
         cursor: pointer;
-        font-size: 18px;
+        font-size: 24px;
         line-height: 1;
-        opacity: 0.6;
+        opacity: 0.7;
         transition: opacity 0.2s;
         color: inherit;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
       }
 
       .dismiss-button:hover {
         opacity: 1;
+        background: rgba(255, 255, 255, 0.15);
       }
 
       .dismiss-button:focus {

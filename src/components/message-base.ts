@@ -37,50 +37,51 @@ export class MessageBase extends LitCore {
       display: block;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .message {
-      padding: 12px 16px;
-      border-radius: 6px;
+      padding: 14px 18px;
+      border-radius: 8px;
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      gap: 12px;
     }
 
     .message-icon {
       flex-shrink: 0;
-      font-size: 16px;
-      line-height: 1.5;
+      font-size: 18px;
+      line-height: 1.4;
     }
 
     .message-content {
       flex: 1;
+      font-weight: 500;
     }
 
     /* Status color variants */
     .status-info {
-      background-color: #e3f2fd;
-      border: 1px solid #2196f3;
-      color: #1565c0;
+      background: rgba(77, 100, 255, 0.08);
+      border: 2px solid #4d64ff;
+      color: #90ffff;
     }
 
     .status-success {
-      background-color: #e8f5e9;
-      border: 1px solid #4caf50;
-      color: #2e7d32;
+      background: rgba(144, 255, 255, 0.08);
+      border: 2px solid #90ffff;
+      color: #90ffff;
     }
 
     .status-warning {
-      background-color: #fff3e0;
-      border: 1px solid #ff9800;
-      color: #e65100;
+      background: rgba(255, 193, 7, 0.08);
+      border: 2px solid #ffc107;
+      color: #ffeb3b;
     }
 
     .status-error {
-      background-color: #ffebee;
-      border: 1px solid #f44336;
-      color: #c62828;
+      background: rgba(244, 67, 54, 0.08);
+      border: 2px solid #f44336;
+      color: #ff6b6b;
     }
   `;
 

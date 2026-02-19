@@ -40,54 +40,57 @@ export class SuperStressTest extends LitElement {
 
   static override styles: CSSResultGroup = css`
     :host {
-      display: block;
-      width: 100%;
-      height: 100vh;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      min-height: 100vh;
+      background: #030303;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .container {
       text-align: center;
-      backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.95);
+      background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+      border: 2px solid #4d64ff;
       padding: 60px 40px;
       border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       max-width: 600px;
     }
 
     h1 {
-      font-size: 36px;
+      font-size: 42px;
       font-weight: 700;
-      margin: 0 0 16px;
-      color: #1a1a1a;
+      margin: 0 0 20px;
+      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
     }
 
     .subtitle {
-      font-size: 16px;
-      color: #666;
+      font-size: 18px;
+      color: #a0a0a0;
       margin: 0 0 40px;
     }
 
     .status {
       font-size: 18px;
-      color: #667eea;
+      color: #90ffff;
       font-weight: 600;
       margin-bottom: 24px;
       height: 24px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .spinner {
       display: inline-block;
       width: 40px;
       height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
+      border: 4px solid rgba(77, 100, 255, 0.3);
+      border-top: 4px solid #4d64ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-bottom: 24px;
@@ -111,34 +114,39 @@ export class SuperStressTest extends LitElement {
     }
 
     .time-display {
-      font-size: 64px;
+      font-size: 72px;
       font-weight: 700;
-      color: #667eea;
+      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin: 32px 0;
-      font-family: 'Monaco', 'Courier New', monospace;
+      font-family: 'Courier New', monospace;
+      letter-spacing: -2px;
     }
 
     .unit {
       font-size: 24px;
-      color: #999;
+      color: #808080;
     }
 
     .details {
-      background: #f8f9fa;
+      background: rgba(77, 100, 255, 0.08);
+      border: 1px solid #4d64ff;
       padding: 20px;
       border-radius: 8px;
       margin-top: 24px;
       text-align: left;
       font-size: 14px;
-      font-family: monospace;
-      color: #333;
+      font-family: 'Courier New', monospace;
+      color: #e0e0e0;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #e0e0e0;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(77, 100, 255, 0.2);
     }
 
     .detail-row:last-child {
@@ -146,11 +154,11 @@ export class SuperStressTest extends LitElement {
     }
 
     .detail-label {
-      color: #666;
+      color: #a0a0a0;
     }
 
     .detail-value {
-      color: #1a1a1a;
+      color: #90ffff;
       font-weight: 600;
     }
 
@@ -162,20 +170,21 @@ export class SuperStressTest extends LitElement {
     button {
       margin-top: 24px;
       padding: 12px 32px;
-      border: none;
+      border: 2px solid #90ffff;
       border-radius: 8px;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      background: #667eea;
+      background: linear-gradient(135deg, #4d64ff 0%, rgba(77, 100, 255, 0.8) 100%);
       color: white;
       transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     button:hover {
-      background: #764ba2;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      background: linear-gradient(135deg, #5d74ff 0%, rgba(77, 100, 255, 0.9) 100%);
+      transform: translateY(-1px);
     }
 
     button:active {
@@ -194,7 +203,7 @@ export class SuperStressTest extends LitElement {
       height: 100%;
       pointer-events: none;
       overflow: hidden;
-      opacity: 0.3;
+      opacity: 0.15;
       z-index: -1;
     }
 
@@ -283,9 +292,9 @@ export class SuperStressTest extends LitElement {
   private _renderHiddenComponent(comp: (typeof this._components)[0]): TemplateResult {
     return html`
       <div class="component-item">
-        <toast-notification status=${comp.status} ?dismissible=${true}>
+        <alert-box status=${comp.status} ?dismissible=${true}>
           ${comp.message}
-        </toast-notification>
+        </alert-box>
       </div>
     `;
   }

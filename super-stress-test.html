@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LitFeature - Super Stress Test</title>
     <link rel="stylesheet" href="./index.css" />
-    <script type="module" src="/src/components/super-stress-test.ts"></script>
+    <script type="module" src="/src/components/app-router.ts"></script>
   </head>
   <body>
-    <nav>
-      <a href="./index.html">Home</a>
-      <a href="./stress-test.html">Stress Test</a>
-      <a href="./super-stress-test.html">Super Stress Test</a>
-    </nav>
-    <super-stress-test></super-stress-test>
+    <script>
+      // Redirect to index with appropriate hash
+      window.location.hash = 'super-stress-test';
+      document.documentElement.innerHTML = '<app-router></app-router>';
+    </script>
+    <app-router></app-router>
   </body>
 </html>
