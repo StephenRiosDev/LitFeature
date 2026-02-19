@@ -2,6 +2,7 @@ import type { LitCore } from './lit-core.ts';
 import type { PropertyDeclaration } from 'lit';
 import type { ReactiveController } from 'lit';
 import { DebugUtils } from './debug-utils.js';
+import { performanceMonitor } from './performance-monitor.js';
 
 /**
  * Base interface for feature configuration objects
@@ -36,6 +37,9 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
   static properties: FeatureProperties = {};
 
   constructor(host: LitCore, config: TConfig) {
+    const markName = `feature-constructor-${Date.now()}-${Math.random()}`;
+    performanceMonitor.mark(markName);
+    
     const featureName = this.constructor.name || 'UnnamedFeature';
     const hostName = host.constructor.name || 'UnknownHost';
     DebugUtils.logProperties('feature-constructor', `Constructing ${featureName} on host ${hostName}`);
@@ -47,6 +51,12 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
     (this.host as any).addController?.(this);
 
     this._litFeatureInit();
+    
+    performanceMonitor.measure(`feature-init-${featureName}`, {
+      markStart: markName,
+      threshold: 0.1,
+      context: { feature: featureName, host: hostName }
+    });
   }
 
   private _litFeatureInit(): void {
@@ -80,6 +90,9 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
     const featureName = this.constructor.name || 'UnnamedFeature';
     DebugUtils.logProperties('property-observer-create', `Creating property descriptor for ${featureName}.${propertyName}`);
 
+    const markName = `property-observer-${featureName}-${propertyName}-${Date.now()}-${Math.random()}`;
+    performanceMonitor.mark(markName);
+
     const feature = this;
     Object.defineProperty(this, propertyName, {
       configurable: true,
@@ -90,6 +103,9 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
         return value;
       },
       set(newValue: unknown) {
+        const setMarkName = `property-set-${featureName}-${propertyName}-${Date.now()}-${Math.random()}`;
+        performanceMonitor.mark(setMarkName);
+
         const hostRecord = feature.host as unknown as Record<string, unknown>;
         const oldValue = hostRecord[propertyName];
         const internalValue = feature.getInternalValue(propertyName);
@@ -129,7 +145,19 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
         } else if (feature._suspendUpdates) {
           DebugUtils.logWiring('property-request-update-suspended', `  → Update suspended for: ${propertyName}`);
         }
+
+        performanceMonitor.measure(`property-set-${featureName}`, {
+          markStart: setMarkName,
+          threshold: 0.1,
+          context: { property: propertyName }
+        });
       }
+    });
+
+    performanceMonitor.measure(`property-observer-create-${featureName}`, {
+      markStart: markName,
+      threshold: 0.05,
+      context: { property: propertyName }
     });
   }
 

@@ -1,6 +1,7 @@
 import { LitElement, PropertyDeclaration } from 'lit';
 import { FeatureConfigEntry, FeatureDefinition, FeatureManager, LitCoreConstructor } from './services/feature-manager.js';
 import { resolveFeatures } from './feature-resolver.js';
+import { performanceMonitor } from './performance-monitor.js';
 
 /**
  * Symbol to mark classes that extend LitCore.
@@ -32,8 +33,18 @@ export class LitCore extends LitElement {
   static properties: Record<string, PropertyDeclaration> = {};
 
   constructor() {
+    const markName = `lt-core-constructor-${Date.now()}-${Math.random()}`;
+    performanceMonitor.mark(markName);
+    
     super();
     this.featureManager = new FeatureManager(this, this.constructor as LitCoreConstructor);
+    
+    const componentName = this.constructor.name || 'UnknownComponent';
+    performanceMonitor.measure(`component-creation-${componentName}`, {
+      markStart: markName,
+      threshold: 0.5,
+      context: { component: componentName }
+    });
   }
 
   /**

@@ -3,6 +3,7 @@ import type { LitFeature } from '../lit-feature.js';
 import type { LitCore } from '../lit-core.js';
 import { resolveFeatures } from '../feature-resolver.js';
 import { DebugUtils } from '../debug-utils.js';
+import { performanceMonitor } from '../performance-monitor.js';
 import type { FeatureConfig, LitCoreConstructor, ResolvedFeatures } from '../types/feature-types.js';
 
 // Re-export types for backward compatibility (deprecated)
@@ -42,6 +43,9 @@ export class FeatureManager {
    * Initialize all features from resolved state
    */
   private _initializeFeatures(resolved: ResolvedFeatures): void {
+    const markName = `feature-manager-init-${Date.now()}-${Math.random()}`;
+    performanceMonitor.mark(markName);
+
     const hostName = (this.host as any).constructor?.name || 'Unknown';
     DebugUtils.logProperties('init-start', `Starting feature instantiation for host: ${hostName}`, { 
       featureCount: resolved.features.size 
@@ -87,6 +91,15 @@ Feature will be assigned to _${featureName} to avoid overwriting the host proper
     }
 
     DebugUtils.logProperties('init-complete', `Feature instantiation complete for host: ${hostName}`);
+
+    performanceMonitor.measure(`feature-manager-init-${hostName}`, {
+      markStart: markName,
+      threshold: 0.5,
+      context: { 
+        component: hostName, 
+        featureCount: resolved.features.size 
+      }
+    });
   }
 
   /**
