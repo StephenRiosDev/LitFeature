@@ -62,7 +62,7 @@ export class ExtendedStatusFeature extends StatusFeature {
   }
   
   // New method specific to extended feature
-  getStatusHeight(): number {
+  getStatusHeight(): 'large' | 'small' {
     return this.showStatusLabel ? 'large' : 'small';
   }
 }
