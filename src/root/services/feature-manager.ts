@@ -47,11 +47,15 @@ export class FeatureManager {
       featureCount: resolved.features.size 
     });
 
+    // Batch 1: Create instances with update requests suspended
     resolved.features.forEach((feature, featureName) => {
       DebugUtils.logProperties('init-feature', `Instantiating feature: ${featureName}`);
 
       const featureInstance = new (feature.class as any)(this.host, feature.config);
       DebugUtils.logProperties('init-instance-created', `  → Instance created for: ${featureName}`);
+
+      // Suspend update requests during initialization
+      featureInstance._suspendUpdateRequests();
 
       this._featureInstances.set(featureName, featureInstance);
 
@@ -70,6 +74,17 @@ Feature will be assigned to _${featureName} to avoid overwriting the host proper
         hostRecord[featureName] = featureInstance;
       }
     });
+
+    // Batch 2: Resume updates and trigger single batch update if needed
+    this._featureInstances.forEach((featureInstance) => {
+      featureInstance._resumeUpdateRequests();
+    });
+
+    // Trigger a single batch update on the host to handle any accumulated changes
+    if (typeof (this.host as any).requestUpdate === 'function') {
+      DebugUtils.logProperties('init-batch-update', `Triggering batch update after feature initialization for host: ${hostName}`);
+      (this.host as any).requestUpdate();
+    }
 
     DebugUtils.logProperties('init-complete', `Feature instantiation complete for host: ${hostName}`);
   }

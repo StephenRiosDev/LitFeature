@@ -26,6 +26,8 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
   
   private _propertyObservers: Map<string, unknown> = new Map();
   private _internalValues: Map<string, unknown> = new Map();
+  private _declaredProperties: Set<string> = new Set();
+  private _suspendUpdates: boolean = false;
 
   /**
    * Static property definitions for this feature.
@@ -51,7 +53,7 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
     const featureName = this.constructor.name || 'UnnamedFeature';
     DebugUtils.logProperties('feature-init', `Initializing ${featureName} - setting up property observers`);
 
-    const properties = (this.constructor as typeof LitFeature).properties;
+    const {properties} = (this.constructor as typeof LitFeature);
     if (!properties) {
       DebugUtils.logProperties('feature-init-no-props', `  → ${featureName} has no properties to observe`);
       return;
@@ -59,6 +61,11 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
 
     const propNames = Object.keys(properties);
     DebugUtils.logProperties('feature-init-props-count', `  → ${featureName} has ${propNames.length} properties`, propNames);
+
+    // Track declared properties for this feature (used during reconciliation)
+    propNames.forEach(propName => {
+      this._declaredProperties.add(propName);
+    });
 
     // At construction time we only define proxy accessors on the feature.
     // Actual value reconciliation (host ↔ feature) happens in firstUpdated/updated
@@ -85,12 +92,27 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
       set(newValue: unknown) {
         const hostRecord = feature.host as unknown as Record<string, unknown>;
         const oldValue = hostRecord[propertyName];
+        const internalValue = feature.getInternalValue(propertyName);
 
         DebugUtils.logWiring('property-setter', `Setting ${featureName}.${propertyName}`, {
           oldValue,
           newValue,
           hostName: feature.host.constructor.name || 'UnknownHost'
         });
+
+        // Guard 1: Check if new value is identical to internal value (already set)
+        if (Object.is(internalValue, newValue)) {
+          DebugUtils.logWiring('property-setter-guard-internal', `  → Skipping: already equals internal value for ${propertyName}`);
+          return;
+        }
+
+        // Guard 2: Check if new value is identical to host value (no change needed)
+        if (Object.is(oldValue, newValue)) {
+          DebugUtils.logWiring('property-setter-guard-host', `  → Skipping: already equals host value for ${propertyName}`);
+          // Still mirror to internal for consistency
+          feature.setInternalValue(propertyName, newValue);
+          return;
+        }
 
         // Feature → host: write to Lit reactive property
         hostRecord[propertyName] = newValue;
@@ -100,10 +122,12 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
         feature.setInternalValue(propertyName, newValue);
         DebugUtils.logWiring('property-to-internal', `  → Mirrored to internal storage: ${propertyName}`);
 
-        // Ensure Lit schedules an update
-        if (typeof (feature.host as any).requestUpdate === 'function') {
+        // Guard 3: Only request update if not suspended
+        if (!feature._suspendUpdates && typeof (feature.host as any).requestUpdate === 'function') {
           (feature.host as any).requestUpdate(propertyName, oldValue);
           DebugUtils.logWiring('property-request-update', `  → Requested update for: ${propertyName}`);
+        } else if (feature._suspendUpdates) {
+          DebugUtils.logWiring('property-request-update-suspended', `  → Update suspended for: ${propertyName}`);
         }
       }
     });
@@ -124,6 +148,34 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
   }
 
   /**
+   * Suspend update requests (used during initialization batching)
+   */
+  _suspendUpdateRequests(): void {
+    this._suspendUpdates = true;
+  }
+
+  /**
+   * Resume update requests (used after initialization batching)
+   */
+  _resumeUpdateRequests(): void {
+    this._suspendUpdates = false;
+  }
+
+  /**
+   * Called when the host connects (ReactiveController lifecycle)
+   */
+  hostConnected(): void {
+    // Subclasses can override this
+  }
+
+  /**
+   * Called when the host disconnects (ReactiveController lifecycle)
+   */
+  hostDisconnected(): void {
+    // Subclasses can override this
+  }
+
+  /**
    * Called after the host element's first update cycle (legacy hook).
    * Kept for compatibility; you can prefer `hostUpdated` for controller-style usage.
    */
@@ -136,27 +188,33 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
     const featureRecord = this as unknown as Record<string, unknown>;
     const hostRecord = this.host as unknown as Record<string, unknown>;
 
-    (_changedProperties || new Map()).forEach((oldValue, propertyName) => {
+    // Only reconcile properties declared by this feature (not all changed properties)
+    this._declaredProperties.forEach(propertyName => {
       const hostValue = hostRecord[propertyName];
       const internalValue = this.getInternalValue(propertyName);
 
-      DebugUtils.logWiring('first-updated-reconcile', `Reconciling property: ${propertyName as string}`, {
+      DebugUtils.logWiring('first-updated-reconcile', `Reconciling property: ${propertyName}`, {
         hostValue,
-        internalValue,
-        oldValue
+        internalValue
       });
 
       if (hostValue !== undefined) {
-        // Host wins: copy host value into feature internal via proxy setter
-        DebugUtils.logWiring('first-updated-host-wins', `  → Host value wins for ${propertyName as string}`);
-        (featureRecord as any)[propertyName] = hostValue;
+        // Host value exists - but only re-set if it differs from internal value
+        if (!Object.is(hostValue, internalValue)) {
+          DebugUtils.logWiring('first-updated-host-wins', `  → Host value wins for ${propertyName}`);
+          (featureRecord as any)[propertyName] = hostValue;
+        } else {
+          DebugUtils.logWiring('first-updated-host-match', `  → Host value already matches internal for ${propertyName}`);
+          // Just ensure internal is set
+          this.setInternalValue(propertyName, hostValue);
+        }
       } else if (internalValue !== undefined) {
-        // Feature default wins: push internal default out to host via proxy setter
-        DebugUtils.logWiring('first-updated-feature-wins', `  → Feature default wins for ${propertyName as string}`, internalValue);
+        // Feature default exists and host doesn't - push it out
+        DebugUtils.logWiring('first-updated-feature-wins', `  → Feature default wins for ${propertyName}`, internalValue);
         (featureRecord as any)[propertyName] = internalValue;
       } else {
-        // Nothing set anywhere; just mirror whatever host currently has (likely undefined)
-        DebugUtils.logWiring('first-updated-mirror', `  → No value set, mirroring undefined for ${propertyName as string}`);
+        // Nothing set anywhere; just mirror undefined for consistency
+        DebugUtils.logWiring('first-updated-mirror', `  → No value set, mirroring undefined for ${propertyName}`);
         this.setInternalValue(propertyName, hostValue);
       }
     });
