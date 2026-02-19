@@ -55,9 +55,6 @@ export class StressTest extends LitElement {
     :host {
       display: block;
       width: 100%;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f8f9fa;
     }
 
     .container {
@@ -66,175 +63,220 @@ export class StressTest extends LitElement {
     }
 
     .header {
-      background: white;
-      padding: 24px;
-      border-radius: 8px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      background: #1f1f1f;
+      padding: 32px;
+      border-radius: 12px;
+      margin-bottom: 32px;
+      border: 1px solid #404040;
     }
 
     h1 {
-      font-size: 28px;
-      font-weight: 600;
-      margin: 0 0 8px;
-      color: #1a1a1a;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0 0 12px;
+      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
     }
 
     .subtitle {
-      color: #666;
-      margin: 0 0 16px;
-      font-size: 16px;
+      color: #a0a0a0;
+      margin: 0 0 20px;
+      font-size: 18px;
     }
 
     .controls {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 16px;
+      margin-top: 20px;
     }
 
     button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
+      padding: 10px 20px;
+      border-radius: 8px;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .btn-primary {
-      background: #007bff;
+      background: linear-gradient(135deg, #4d64ff 0%, rgba(77, 100, 255, 0.8) 100%);
       color: white;
+      border: 2px solid #4d64ff;
     }
 
     .btn-primary:hover {
-      background: #0056b3;
+      background: linear-gradient(135deg, #5d74ff 0%, rgba(77, 100, 255, 0.9) 100%);
+      transform: translateY(-1px);
     }
 
     .btn-secondary {
-      background: #6c757d;
-      color: white;
+      background: #2a2a2a;
+      color: #90ffff;
+      border: 2px solid #90ffff;
     }
 
     .btn-secondary:hover {
-      background: #545b62;
+      background: #353535;
+      transform: translateY(-1px);
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
     }
 
     .stat {
-      background: #f0f0f0;
-      padding: 12px;
-      border-radius: 4px;
+      background: #2a2a2a;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #404040;
       font-size: 14px;
     }
 
+    .stat:hover {
+      border-color: #4d64ff;
+    }
+
     .stat-label {
-      color: #666;
+      color: #a0a0a0;
       font-size: 12px;
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      font-weight: 600;
     }
 
     .stat-value {
-      font-size: 20px;
-      font-weight: 600;
-      color: #333;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .stat-value.warning {
-      color: #ff9800;
+      background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .stat-value.error {
-      color: #f44336;
+      background: linear-gradient(135deg, #f44336 0%, #ff6b6b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .components-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 12px;
-      margin-top: 24px;
+      gap: 16px;
+      margin-top: 32px;
     }
 
     .section {
-      background: white;
+      background: #1f1f1f;
       padding: 24px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      border: 1px solid #404040;
+    }
+
+    .section:hover {
+      border-color: #4d64ff;
     }
 
     .section-title {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       margin: 0 0 16px;
-      color: #333;
+      color: #e0e0e0;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .component-type-badge {
       display: inline-block;
-      padding: 2px 8px;
-      border-radius: 3px;
+      padding: 4px 10px;
+      border-radius: 6px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid;
     }
 
     .badge-simple {
-      background: #e3f2fd;
-      color: #1565c0;
+      background: rgba(77, 100, 255, 0.15);
+      color: #90ffff;
+      border-color: #4d64ff;
     }
 
     .badge-medium {
-      background: #fff3e0;
-      color: #e65100;
+      background: rgba(255, 193, 7, 0.15);
+      color: #ffeb3b;
+      border-color: #ffc107;
     }
 
     .badge-complex {
-      background: #f3e5f5;
-      color: #6a1b9a;
+      background: rgba(244, 67, 54, 0.15);
+      color: #ff6b6b;
+      border-color: #f44336;
     }
 
     .component-wrapper {
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      padding: 12px;
-      background: #fafafa;
+      border: 2px solid #404040;
+      border-radius: 8px;
+      padding: 16px;
+      background: rgba(77, 100, 255, 0.05);
+    }
+
+    .component-wrapper:hover {
+      border-color: #4d64ff;
+      background: rgba(77, 100, 255, 0.1);
     }
 
     .component-meta {
       font-size: 12px;
-      color: #999;
-      margin-top: 8px;
-      font-family: monospace;
+      color: #808080;
+      margin-top: 12px;
+      font-family: 'Courier New', monospace;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px;
+      border-radius: 4px;
     }
 
     .loading {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px;
-      color: #666;
+      padding: 60px 20px;
+      color: #a0a0a0;
+      font-size: 18px;
     }
 
     .spinner {
       display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #007bff;
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(77, 100, 255, 0.3);
+      border-top: 3px solid #4d64ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-right: 12px;
+      margin-right: 16px;
     }
 
     @keyframes spin {
@@ -247,23 +289,25 @@ export class StressTest extends LitElement {
     }
 
     .warning-message {
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      color: #856404;
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 16px;
+      background: rgba(255, 193, 7, 0.1);
+      border: 2px solid #ffc107;
+      color: #ffeb3b;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
       font-size: 14px;
+      font-weight: 500;
     }
 
     .error-message {
-      background: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 16px;
+      background: rgba(244, 67, 54, 0.1);
+      border: 2px solid #f44336;
+      color: #ff6b6b;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
       font-size: 14px;
+      font-weight: 500;
     }
   `;
 

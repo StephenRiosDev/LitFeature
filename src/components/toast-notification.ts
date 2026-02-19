@@ -82,7 +82,6 @@ export class ToastNotification extends AlertBox {
       .toast {
         position: relative;
         max-width: var(--toast-max-width);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         overflow: hidden;
       }
 
@@ -93,7 +92,7 @@ export class ToastNotification extends AlertBox {
         left: 0;
         height: 3px;
         background-color: currentColor;
-        opacity: 0.4;
+        opacity: 0.5;
         transition: width 0.1s linear;
       }
 
@@ -134,12 +133,7 @@ export class ToastNotification extends AlertBox {
 
       /* Paused state visual */
       .toast.paused .progress-bar {
-        animation: pulse 1s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%, 100% { opacity: 0.4; }
-        50% { opacity: 0.8; }
+        opacity: 0.3;
       }
     `
   ];
