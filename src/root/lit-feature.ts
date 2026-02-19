@@ -19,7 +19,7 @@ export interface FeatureProperties {
  * Base class for all features in the system.
  * Features extend this class to add functionality to LitCore components.
  */
-export class LitFeature<TConfig extends FeatureConfig = FeatureConfig> implements ReactiveController {
+export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> implements ReactiveController {
   host: LitCore;
   config: TConfig;
   

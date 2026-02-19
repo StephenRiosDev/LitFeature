@@ -67,13 +67,7 @@ export interface LitCoreConstructor {
   name: string;
   provide?: Record<string, FeatureDefinition>;
   configure?: Record<string, FeatureConfigEntry | 'disable'>;
-  /** @deprecated Use `provide` instead */
-  provides?: Record<string, FeatureDefinition>;
-  /** @deprecated Use `configure` instead */
-  features?: Record<string, FeatureConfigEntry | 'disable'>;
   properties?: Record<string, PropertyDeclaration>;
-  _resolvedFeatures?: ResolvedFeatures;
-  _resolvedProperties?: Record<string, PropertyDeclaration>;
 }
 
 // Re-export FeatureConfig for convenience
