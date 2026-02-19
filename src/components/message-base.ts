@@ -85,7 +85,7 @@ export class MessageBase extends LitCore {
   `;
 
   firstUpdated(_changedProperties?: Map<PropertyKey, unknown>): void {
-    super.firstUpdated(_changedProperties);
+    super.firstUpdated(_changedProperties ?? new Map());
     console.log('[MessageBase] firstUpdated with status:', this.status, 'showIcon:', this.showIcon);
   }
 
