@@ -3,7 +3,10 @@ import { state } from 'lit/decorators.js';
 import { LitCore } from '../root/lit-core.js';
 
 // Import all notification components
+import './message-base.js';
 import './message-box.js';
+import './alert-box.js';
+import './toast-notification.js';
 
 // Import types for declarations
 import type { StatusType } from '../features/status-feature.js';
@@ -187,6 +190,32 @@ export class NotificationDemo extends LitElement {
       <h1>LitFeature Notification System</h1>
       <p class="subtitle">A demonstration of the composable feature architecture with 4 levels of inheritance</p>
 
+      <!-- Hierarchy Diagram -->
+      <div class="section">
+        <h2>Component Hierarchy</h2>
+        <div class="hierarchy-diagram">
+          <div><strong>Level 1:</strong> message-base <span class="provides">→ provides StatusFeature</span></div>
+          <div>    ↓</div>
+          <div><strong>Level 2:</strong> message-box <span class="provides">→ provides VisibilityFeature</span> <span class="configures">+ configures Status</span></div>
+          <div>    ↓</div>
+          <div><strong>Level 3:</strong> alert-box <span class="provides">→ provides DismissFeature</span> <span class="configures">+ configures Status, Visibility</span></div>
+          <div>    ↓</div>
+          <div><strong>Level 4:</strong> toast-notification <span class="provides">→ provides TimerFeature</span> <span class="configures">+ configures all</span></div>
+        </div>
+      </div>
+
+      <!-- Level 1: message-base -->
+      <div class="section">
+        <h2><span class="level-badge">Level 1</span> message-base</h2>
+        <p>Base component with <span class="code">StatusFeature</span> - controls colors and icons based on severity.</p>
+        <div class="demo-grid">
+          <message-base status="info">This is an info message</message-base>
+          <message-base status="success">This is a success message</message-base>
+          <message-base status="warning">This is a warning message</message-base>
+          <message-base status="error">This is an error message</message-base>
+          <message-base status="info" .showIcon=${false}>Message without icon (show-icon=false)</message-base>
+        </div>
+      </div>
 
       <!-- Level 2: message-box -->
       <div class="section">
@@ -204,7 +233,69 @@ export class NotificationDemo extends LitElement {
         </div>
       </div>
 
-     
+      <!-- Level 3: alert-box -->
+      <div class="section">
+        <h2><span class="level-badge">Level 3</span> alert-box</h2>
+        <p>Extends message-box with <span class="code">DismissFeature</span> - adds close button and callbacks.</p>
+        <div class="demo-grid">
+          <div class="demo-row">
+            <button @click=${() => this._resetAlerts()}>Reset Alerts</button>
+          </div>
+          <alert-box id="alert-1" status="warning">
+            This is a dismissible alert. Click the × button to dismiss it.
+          </alert-box>
+          <alert-box id="alert-2" status="error" .dismissible=${false}>
+            This alert has dismissible=false, so no close button appears.
+          </alert-box>
+          <alert-box id="alert-3" status="info">
+            Try dismissing this alert. The Dismiss feature integrates with Visibility for smooth fade-out.
+          </alert-box>
+        </div>
+      </div>
+
+      <!-- Level 4: toast-notification -->
+      <div class="section">
+        <h2><span class="level-badge">Level 4</span> toast-notification</h2>
+        <p>Extends alert-box with <span class="code">TimerFeature</span> - adds auto-dismiss countdown.</p>
+        <ul class="feature-list">
+          <li><strong>Auto-dismiss:</strong> Countdown timer that triggers dismiss</li>
+          <li><strong>Progress bar:</strong> Visual countdown indicator</li>
+          <li><strong>Pause on hover:</strong> Timer pauses when mouse enters</li>
+          <li><strong>Controls:</strong> Pause/Resume and Reset buttons</li>
+        </ul>
+        <div class="demo-row">
+          <button @click=${() => this._createToast('info')}>Info Toast</button>
+          <button @click=${() => this._createToast('success')}>Success Toast</button>
+          <button @click=${() => this._createToast('warning')}>Warning Toast</button>
+          <button @click=${() => this._createToast('error')}>Error Toast</button>
+        </div>
+      </div>
+
+      <!-- Feature Summary -->
+      <div class="section">
+        <h2>Features Demonstrated</h2>
+        <ul class="feature-list">
+          <li><strong>@provide decorator:</strong> Registers features at each component level</li>
+          <li><strong>@configure decorator:</strong> Overrides feature config in descendant classes</li>
+          <li><strong>Property inheritance:</strong> Feature properties automatically added to host</li>
+          <li><strong>Lifecycle hooks:</strong> beforeConnectedCallback, afterConnectedCallback, updated, etc.</li>
+          <li><strong>Feature communication:</strong> Timer → Dismiss, Dismiss → Visibility</li>
+          <li><strong>Config merging:</strong> Descendant configs merge with ancestor defaults</li>
+        </ul>
+      </div>
+
+      <!-- Toast Container (fixed position) -->
+      <div class="toast-container">
+        ${this._toasts.map(toast => html`
+          <toast-notification 
+            status=${toast.status}
+            duration="5000"
+            @dismissed=${() => this._removeToast(toast.id)}
+          >
+            ${toast.message}
+          </toast-notification>
+        `)}
+      </div>
     `;
   }
 
