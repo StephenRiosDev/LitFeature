@@ -40,13 +40,14 @@ export class SuperStressTest extends LitElement {
       width: 100%;
       min-height: 100vh;
       background: #030303;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'IBM Plex Sans', 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
     }
 
     .container {
       text-align: center;
-      background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
-      border: 2px solid #4d64ff;
+      background: linear-gradient(135deg, rgba(13, 18, 32, 0.8) 0%, rgba(11, 15, 25, 0.8) 100%);
+      border: 1px solid rgba(125, 211, 252, 0.2);
+      box-shadow: 0 8px 32px rgba(125, 211, 252, 0.1);
       padding: 60px 40px;
       border-radius: 16px;
       max-width: 600px;
@@ -56,7 +57,7 @@ export class SuperStressTest extends LitElement {
       font-size: 42px;
       font-weight: 700;
       margin: 0 0 20px;
-      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      background: linear-gradient(135deg, #7dd3fc 0%, #34d399 60%, #fbbf24 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -64,27 +65,28 @@ export class SuperStressTest extends LitElement {
     }
 
     .subtitle {
-      font-size: 18px;
-      color: #a0a0a0;
+      font-size: 17px;
+      color: #cbd5f5;
       margin: 0 0 40px;
+      line-height: 1.7;
     }
 
     .status {
-      font-size: 18px;
-      color: #90ffff;
+      font-size: 16px;
+      color: #7dd3fc;
       font-weight: 600;
       margin-bottom: 24px;
       height: 24px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.1em;
     }
 
     .spinner {
       display: inline-block;
       width: 40px;
       height: 40px;
-      border: 4px solid rgba(77, 100, 255, 0.3);
-      border-top: 4px solid #4d64ff;
+      border: 4px solid rgba(125, 211, 252, 0.2);
+      border-top: 4px solid #7dd3fc;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-bottom: 24px;
@@ -110,7 +112,7 @@ export class SuperStressTest extends LitElement {
     .time-display {
       font-size: 72px;
       font-weight: 700;
-      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      background: linear-gradient(135deg, #7dd3fc 0%, #34d399 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -121,26 +123,26 @@ export class SuperStressTest extends LitElement {
 
     .unit {
       font-size: 24px;
-      color: #808080;
+      color: #94a3af;
     }
 
     .details {
-      background: rgba(77, 100, 255, 0.08);
-      border: 1px solid #4d64ff;
+      background: rgba(125, 211, 252, 0.08);
+      border: 1px solid rgba(125, 211, 252, 0.2);
       padding: 20px;
       border-radius: 8px;
       margin-top: 24px;
       text-align: left;
       font-size: 14px;
       font-family: 'Courier New', monospace;
-      color: #e0e0e0;
+      color: #cbd5f5;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
       padding: 12px 0;
-      border-bottom: 1px solid rgba(77, 100, 255, 0.2);
+      border-bottom: 1px solid rgba(125, 211, 252, 0.1);
     }
 
     .detail-row:last-child {

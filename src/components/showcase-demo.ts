@@ -34,7 +34,7 @@ export class ShowcaseDemo extends LitCore {
       color: #e0e0e0;
       background: #030303;
       min-height: 100vh;
-      padding: 40px 20px;
+      padding: 0 20px 40px 20px;
     }
 
     .container {
@@ -341,20 +341,10 @@ export class ShowcaseDemo extends LitCore {
   override render(): TemplateResult {
     return html`
       <div class="container">
-        ${this._renderHeader()}
         ${this._renderTier1()}
         ${this._renderTier2()}
         ${this._renderTier3()}
         ${this._renderCTA()}
-      </div>
-    `;
-  }
-
-  private _renderHeader(): TemplateResult {
-    return html`
-      <div class="header">
-        <h1>LitFeature</h1>
-        <p>Composable features for Lit web components</p>
       </div>
     `;
   }

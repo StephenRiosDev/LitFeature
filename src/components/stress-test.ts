@@ -53,6 +53,12 @@ export class StressTest extends LitElement {
     :host {
       display: block;
       width: 100%;
+      color: #f2f2f2;
+      font-family: 'IBM Plex Sans', 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    :host * {
+      box-sizing: border-box;
     }
 
     .container {
@@ -61,28 +67,25 @@ export class StressTest extends LitElement {
     }
 
     .header {
-      background: #1f1f1f;
-      padding: 32px;
-      border-radius: 12px;
-      margin-bottom: 32px;
-      border: 1px solid #404040;
+      margin-bottom: 40px;
     }
 
     h1 {
-      font-size: 42px;
+      font-size: 52px;
       font-weight: 700;
       margin: 0 0 12px;
-      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #7dd3fc 0%, #34d399 60%, #fbbf24 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: -1px;
     }
 
     .subtitle {
-      color: #a0a0a0;
-      margin: 0 0 20px;
-      font-size: 18px;
+      color: #cbd5f5;
+      margin: 0 0 24px;
+      font-size: 17px;
+      line-height: 1.7;
     }
 
     .controls {
@@ -100,29 +103,31 @@ export class StressTest extends LitElement {
       cursor: pointer;
       transition: all 0.2s;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #4d64ff 0%, rgba(77, 100, 255, 0.8) 100%);
-      color: white;
-      border: 2px solid #4d64ff;
+      background: linear-gradient(135deg, #7dd3fc 0%, #34d399 100%);
+      color: #0a0f1a;
+      border: none;
+      box-shadow: 0 4px 12px rgba(125, 211, 252, 0.2);
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, #5d74ff 0%, rgba(77, 100, 255, 0.9) 100%);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(125, 211, 252, 0.35);
     }
 
     .btn-secondary {
-      background: #2a2a2a;
-      color: #90ffff;
-      border: 2px solid #90ffff;
+      background: #111827;
+      color: #7dd3fc;
+      border: 1px solid rgba(125, 211, 252, 0.3);
     }
 
     .btn-secondary:hover {
-      background: #353535;
-      transform: translateY(-1px);
+      border-color: rgba(125, 211, 252, 0.5);
+      background: #1a1f2e;
+      transform: translateY(-2px);
     }
 
     .stats {
@@ -133,44 +138,45 @@ export class StressTest extends LitElement {
     }
 
     .stat {
-      background: #2a2a2a;
-      padding: 16px;
-      border-radius: 8px;
-      border: 1px solid #404040;
-      font-size: 14px;
+      background: #0b0f19;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(125, 211, 252, 0.15);
+      transition: all 0.2s ease;
     }
 
     .stat:hover {
-      border-color: #4d64ff;
+      border-color: rgba(125, 211, 252, 0.3);
+      background: #0d1220;
     }
 
     .stat-label {
-      color: #a0a0a0;
-      font-size: 12px;
+      color: #94a3af;
+      font-size: 11px;
       text-transform: uppercase;
       margin-bottom: 8px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.1em;
       font-weight: 600;
     }
 
     .stat-value {
       font-size: 28px;
       font-weight: 700;
-      background: linear-gradient(135deg, #4d64ff 0%, #90ffff 100%);
+      background: linear-gradient(135deg, #7dd3fc 0%, #34d399 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
     .stat-value.warning {
-      background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
     .stat-value.error {
-      background: linear-gradient(135deg, #f44336 0%, #ff6b6b 100%);
+      background: linear-gradient(135deg, #ff6b6b 0%, #f44336 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -184,26 +190,28 @@ export class StressTest extends LitElement {
     }
 
     .section {
-      background: #1f1f1f;
+      background: #0b0f19;
       padding: 24px;
       border-radius: 12px;
-      border: 1px solid #404040;
+      border: 1px solid rgba(125, 211, 252, 0.15);
+      transition: all 0.2s ease;
     }
 
     .section:hover {
-      border-color: #4d64ff;
+      border-color: rgba(125, 211, 252, 0.3);
+      background: #0d1220;
     }
 
     .section-title {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
       margin: 0 0 16px;
-      color: #e0e0e0;
+      color: #bae6fd;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.1em;
     }
 
     .component-type-badge {
@@ -213,48 +221,50 @@ export class StressTest extends LitElement {
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
       border: 1px solid;
     }
 
     .badge-simple {
-      background: rgba(77, 100, 255, 0.15);
-      color: #90ffff;
-      border-color: #4d64ff;
+      background: rgba(125, 211, 252, 0.15);
+      color: #7dd3fc;
+      border-color: rgba(125, 211, 252, 0.3);
     }
 
     .badge-medium {
-      background: rgba(255, 193, 7, 0.15);
-      color: #ffeb3b;
-      border-color: #ffc107;
+      background: rgba(251, 191, 36, 0.15);
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.3);
     }
 
     .badge-complex {
-      background: rgba(244, 67, 54, 0.15);
+      background: rgba(255, 107, 107, 0.15);
       color: #ff6b6b;
-      border-color: #f44336;
+      border-color: rgba(255, 107, 107, 0.3);
     }
 
     .component-wrapper {
-      border: 2px solid #404040;
+      border: 1px solid rgba(125, 211, 252, 0.15);
       border-radius: 8px;
       padding: 16px;
-      background: rgba(77, 100, 255, 0.05);
+      background: rgba(125, 211, 252, 0.05);
+      transition: all 0.2s ease;
     }
 
     .component-wrapper:hover {
-      border-color: #4d64ff;
-      background: rgba(77, 100, 255, 0.1);
+      border-color: rgba(125, 211, 252, 0.3);
+      background: rgba(125, 211, 252, 0.08);
     }
 
     .component-meta {
       font-size: 12px;
-      color: #808080;
+      color: #94a3af;
       margin-top: 12px;
       font-family: 'Courier New', monospace;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(125, 211, 252, 0.05);
       padding: 8px;
       border-radius: 4px;
+      border: 1px solid rgba(125, 211, 252, 0.1);
     }
 
     .loading {
@@ -262,16 +272,16 @@ export class StressTest extends LitElement {
       align-items: center;
       justify-content: center;
       padding: 60px 20px;
-      color: #a0a0a0;
-      font-size: 18px;
+      color: #cbd5f5;
+      font-size: 16px;
     }
 
     .spinner {
       display: inline-block;
       width: 24px;
       height: 24px;
-      border: 3px solid rgba(77, 100, 255, 0.3);
-      border-top: 3px solid #4d64ff;
+      border: 3px solid rgba(125, 211, 252, 0.2);
+      border-top: 3px solid #7dd3fc;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-right: 16px;
@@ -287,9 +297,9 @@ export class StressTest extends LitElement {
     }
 
     .warning-message {
-      background: rgba(255, 193, 7, 0.1);
-      border: 2px solid #ffc107;
-      color: #ffeb3b;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: #fbbf24;
       padding: 16px;
       border-radius: 8px;
       margin-bottom: 20px;
