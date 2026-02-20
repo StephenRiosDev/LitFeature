@@ -12,7 +12,7 @@ export class NavBar extends LitElement {
   @property()
   currentPage: 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test' = 'home';
 
-  private baseUrl = import.meta.env.BASE_URL;
+  private baseUrl = (import.meta as any).env.BASE_URL;
 
   static override styles = css`
     :host {

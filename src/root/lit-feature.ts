@@ -1,5 +1,5 @@
 import type { LitCore } from './lit-core.ts';
-import type { PropertyDeclaration } from 'lit';
+import type { CSSResult, CSSResultGroup, PropertyDeclaration } from 'lit';
 import type { ReactiveController } from 'lit';
 import { DebugUtils } from './debug-utils.js';
 import { performanceMonitor } from './performance-monitor.js';
@@ -40,7 +40,7 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
    */
   static properties: FeatureProperties = {};
 
-  static styles?: unknown;
+  static styles?: CSSResult | CSSResultGroup | undefined;
 
   constructor(host: LitCore, config: TConfig) {
     const markName = `feature-constructor-${Date.now()}-${Math.random()}`;
