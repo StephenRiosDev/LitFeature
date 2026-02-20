@@ -1,3 +1,4 @@
+import { css } from 'lit';
 import { AutoDismissFeature, AutoDismissConfig } from './auto-dismiss-feature.js';
 import type { LitCore } from '../root/lit-core.js';
 import { property } from '../root/decorators/feature-property.js';
@@ -32,10 +33,39 @@ export class SwipeDismissFeature extends AutoDismissFeature {
   private _startY = 0;
   private _isDragging = false;
 
+  static styles = css`
+    .notification {
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .notification:active {
+      cursor: grabbing;
+      box-shadow: 0 6px 16px rgba(79, 172, 254, 0.4);
+    }
+
+    .dismiss-btn {
+      z-index: 10;
+    }
+  `;
+
   constructor(host: LitCore, config: SwipeDismissConfig) {
     super(host, config);
     this.swipeToDismiss = config.swipeToDismiss ?? true;
     this.swipeThreshold = config.swipeThreshold || 100;
+  }
+
+  updated(changedProperties: Map<PropertyKey, unknown>): void {
+    super.updated(changedProperties);
+
+    if (changedProperties.has('swipeToDismiss')) {
+      if (this.swipeToDismiss) {
+        this._attachSwipeListeners();
+      } else {
+        this._detachSwipeListeners();
+      }
+    }
   }
 
   /**
@@ -45,10 +75,7 @@ export class SwipeDismissFeature extends AutoDismissFeature {
     super.connectedCallback();
     
     if (this.swipeToDismiss) {
-      this.host.addEventListener('touchstart', this._handleTouchStart, { passive: true });
-      this.host.addEventListener('touchmove', this._handleTouchMove, { passive: false });
-      this.host.addEventListener('touchend', this._handleTouchEnd);
-      this.host.addEventListener('mousedown', this._handleMouseDown);
+      this._attachSwipeListeners();
     }
   }
 
@@ -57,13 +84,8 @@ export class SwipeDismissFeature extends AutoDismissFeature {
    */
   override disconnectedCallback(): void {
     super.disconnectedCallback();
-    
-    this.host.removeEventListener('touchstart', this._handleTouchStart);
-    this.host.removeEventListener('touchmove', this._handleTouchMove);
-    this.host.removeEventListener('touchend', this._handleTouchEnd);
-    this.host.removeEventListener('mousedown', this._handleMouseDown);
-    document.removeEventListener('mousemove', this._handleMouseMove);
-    document.removeEventListener('mouseup', this._handleMouseUp);
+
+    this._detachSwipeListeners();
   }
 
   /**
@@ -81,6 +103,10 @@ export class SwipeDismissFeature extends AutoDismissFeature {
         }
       })
     );
+  }
+
+  setSwipeEnabled(enabled: boolean): void {
+    this.swipeToDismiss = enabled;
   }
 
   private _handleTouchStart = (e: TouchEvent) => {
@@ -148,5 +174,21 @@ export class SwipeDismissFeature extends AutoDismissFeature {
   private _resetSwipe(): void {
     this.swipeOffset = 0;
     (this.host as HTMLElement).style.transform = '';
+  }
+
+  private _attachSwipeListeners(): void {
+    this.host.addEventListener('touchstart', this._handleTouchStart, { passive: true });
+    this.host.addEventListener('touchmove', this._handleTouchMove, { passive: false });
+    this.host.addEventListener('touchend', this._handleTouchEnd);
+    this.host.addEventListener('mousedown', this._handleMouseDown);
+  }
+
+  private _detachSwipeListeners(): void {
+    this.host.removeEventListener('touchstart', this._handleTouchStart);
+    this.host.removeEventListener('touchmove', this._handleTouchMove);
+    this.host.removeEventListener('touchend', this._handleTouchEnd);
+    this.host.removeEventListener('mousedown', this._handleMouseDown);
+    document.removeEventListener('mousemove', this._handleMouseMove);
+    document.removeEventListener('mouseup', this._handleMouseUp);
   }
 }

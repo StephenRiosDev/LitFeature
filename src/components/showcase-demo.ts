@@ -684,7 +684,9 @@ export class ShowcaseDemo extends LitCore {
   }
 
   private _handleAutoNotificationDismissed(): void {
-    this._showAutoNotification = false;
+    setTimeout(() => {
+        this._showAutoNotification = false;
+    }, 200);
     // Respawn after 0.5 seconds
     setTimeout(() => {
       this._showAutoNotification = true;
@@ -692,7 +694,10 @@ export class ShowcaseDemo extends LitCore {
   }
 
   private _handleSwipeNotificationDismissed(): void {
-    this._showSwipeNotification = false;
+    setTimeout(() => {
+        this._showSwipeNotification = false;
+    }, 200);
+    
     // Respawn after 0.5 seconds
     setTimeout(() => {
       this._showSwipeNotification = true;
@@ -700,7 +705,10 @@ export class ShowcaseDemo extends LitCore {
   }
 
   private _handleBasicNotificationDismissed(): void {
-    this._showBasicNotification = false;
+    setTimeout(() => {
+      this._showBasicNotification = false;
+    }, 200);
+
     // Respawn after 0.5 seconds
     setTimeout(() => {
       this._showBasicNotification = true;

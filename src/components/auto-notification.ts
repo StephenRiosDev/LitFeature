@@ -26,29 +26,6 @@ export class AutoNotification extends LitCore {
   static override styles: CSSResultGroup = css`
     :host {
       display: block;
-      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    :host([dismissed]) {
-      animation: slideOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    @keyframes slideOut {
-      to {
-        opacity: 0;
-        transform: translateX(100%) scale(0.95);
-      }
     }
 
     .notification {
@@ -74,54 +51,6 @@ export class AutoNotification extends LitCore {
       line-height: 1.5;
     }
 
-    .dismiss-btn {
-      position: absolute;
-      top: 50%;
-      right: 12px;
-      transform: translateY(-50%);
-      width: 28px;
-      height: 28px;
-      border: none;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .dismiss-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    .timer-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 0 0 12px 12px;
-    }
-
-    .timer-bar {
-      height: 100%;
-      background: white;
-      animation: timer 4s linear forwards;
-    }
-
-    @keyframes timer {
-      from {
-        width: 100%;
-      }
-      to {
-        width: 0%;
-      }
-    }
   `;
 
   override render(): TemplateResult {
@@ -133,8 +62,8 @@ export class AutoNotification extends LitCore {
         </div>
         <button
           class="dismiss-btn"
-          @click=${() => this.Dismiss.dismiss()}
-          aria-label="Dismiss"
+          @click=${this.Dismiss.handleDismissClick}
+          aria-label=${this.Dismiss.getDismissLabel()}
         >
           ×
         </button>

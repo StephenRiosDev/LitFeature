@@ -1,3 +1,4 @@
+import { css } from 'lit';
 import { LitFeature, FeatureProperties, FeatureConfig } from '../root/lit-feature.js';
 import type { LitCore } from '../root/lit-core.js';
 import { property } from '../root/decorators/feature-property.js';
@@ -34,6 +35,43 @@ export class BaseDismissFeature extends LitFeature<BaseDismissConfig> {
 
   declare dismissLabel: string;
 
+  static styles = css`
+    :host([dismissed]) {
+      animation: dismissFadeOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+
+    @keyframes dismissFadeOut {
+      to {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+    }
+
+    .dismiss-btn {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .dismiss-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) scale(1.1);
+    }
+  `;
+
   constructor(host: LitCore, config: BaseDismissConfig) {
     super(host, config);
     this.dismissible = config.dismissible ?? true;
@@ -56,6 +94,14 @@ export class BaseDismissFeature extends LitFeature<BaseDismissConfig> {
   reset(): void {
     this.dismissed = false;
   }
+
+  getDismissLabel(): string {
+    return this.dismissLabel;
+  }
+
+  handleDismissClick = () => {
+    this.dismiss();
+  };
 
   /**
    * Dispatch dismissed event

@@ -59,7 +59,7 @@ export class ThemedPanel extends LitCore {
     return html`
       <div class="panel">
         <div class="panel-indicator">
-          ${this.theme === 'auto' ? `Auto (${resolved})` : resolved}
+          ${this.Theme.theme === 'auto' ? `Auto (${resolved})` : resolved}
         </div>
         <div class="panel-content">
           <slot>

@@ -79,7 +79,7 @@ export class ThemedCard extends LitCore {
       <div class="card">
         <div class="card-header">
           <h3 class="card-title"><slot name="title">Themed Card</slot></h3>
-          <button class="theme-toggle" @click=${this._handleToggle}>
+          <button class="theme-toggle" @click=${() => this.Theme.toggleTheme()}>
             ${this.Theme.getResolvedTheme() === 'light' ? '◐' : '◑'}
           </button>
         </div>
@@ -90,7 +90,4 @@ export class ThemedCard extends LitCore {
     `;
   }
 
-  private _handleToggle() {
-    this.Theme.toggleTheme();
-  }
 }

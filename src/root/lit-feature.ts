@@ -21,7 +21,11 @@ export interface FeatureProperties {
  * Base class for all features in the system.
  * Features extend this class to add functionality to LitCore components.
  */
+export const LIT_FEATURE_MARKER = Symbol('litFeature');
+
 export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> implements ReactiveController {
+  static readonly [LIT_FEATURE_MARKER] = true;
+
   host: LitCore;
   config: TConfig;
   
@@ -35,6 +39,8 @@ export abstract class LitFeature<TConfig extends FeatureConfig = FeatureConfig> 
    * Override in subclasses to define reactive properties.
    */
   static properties: FeatureProperties = {};
+
+  static styles?: unknown;
 
   constructor(host: LitCore, config: TConfig) {
     const markName = `feature-constructor-${Date.now()}-${Math.random()}`;

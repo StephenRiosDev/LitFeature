@@ -74,6 +74,8 @@ export class ThemeFeature extends LitFeature<ThemeConfig> {
     this.theme = config.defaultTheme || 'light';
     this.systemTheme = this._detectSystemTheme();
     this.colors = this._computeColors();
+    this._applyResolvedTheme();
+    this._applyCSSVariables();
   }
 
   /**
@@ -81,13 +83,9 @@ export class ThemeFeature extends LitFeature<ThemeConfig> {
    */
   connectedCallback(): void {
     if (this.config.respectSystemTheme !== false) {
-      this._mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      this._mediaQuery.addEventListener('change', this._handleSystemThemeChange);
-      
-      // Apply system theme if 'auto' mode
-      if (this.theme === 'auto') {
-        this._applyResolvedTheme();
-      }
+      this._setupSystemThemeListener();
+      this._applyResolvedTheme();
+      this._applyCSSVariables();
     }
   }
 
@@ -128,6 +126,42 @@ export class ThemeFeature extends LitFeature<ThemeConfig> {
    */
   toggleTheme(): void {
     this.theme = this.getResolvedTheme() === 'light' ? 'dark' : 'light';
+  }
+
+  setTheme(variant: ThemeVariant): void {
+    this.theme = variant;
+  }
+
+  setRespectSystemTheme(value: boolean): void {
+    this.config.respectSystemTheme = value;
+    if (value) {
+      this._setupSystemThemeListener();
+      this.systemTheme = this._detectSystemTheme();
+      this._applyResolvedTheme();
+      this._applyCSSVariables();
+    } else if (this._mediaQuery) {
+      this._mediaQuery.removeEventListener('change', this._handleSystemThemeChange);
+      this._mediaQuery = undefined;
+    }
+  }
+
+  setCssPrefix(prefix: string): void {
+    this._cssPrefix = prefix;
+    this._applyCSSVariables();
+  }
+
+  refreshTheme(): void {
+    this.systemTheme = this._detectSystemTheme();
+    this.colors = this._computeColors();
+    this._applyResolvedTheme();
+    this._applyCSSVariables();
+  }
+
+  private _setupSystemThemeListener(): void {
+    if (!this._mediaQuery && typeof window !== 'undefined' && window.matchMedia) {
+      this._mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      this._mediaQuery.addEventListener('change', this._handleSystemThemeChange);
+    }
   }
 
   /**

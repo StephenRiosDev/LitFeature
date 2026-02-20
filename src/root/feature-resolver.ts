@@ -8,7 +8,7 @@ import type {
   LitCoreConstructor,
   FeatureConfig
 } from './types/feature-types.js';
-import type { LitFeature } from './lit-feature.js';
+import { LitFeature, LIT_FEATURE_MARKER } from './lit-feature.js';
 import { LIT_CORE_MARKER } from './lit-core.js';
 import { FEATURE_META } from './decorators/feature-meta.js';
 import { getFeaturePropertyMetadata } from './decorators/feature-property.js';
@@ -76,6 +76,58 @@ function mergeConfigEntries(
     config: mergedConfig,
     properties: mergedProps
   };
+}
+
+function collectFeatureStyles(featureClass: typeof LitFeature): any[] {
+  const styles: any[] = [];
+  const chain: typeof LitFeature[] = [];
+  let current: typeof LitFeature | null = featureClass;
+
+  while (current && (current as any)[LIT_FEATURE_MARKER]) {
+    chain.unshift(current);
+
+    if (current === LitFeature) {
+      break;
+    }
+
+    current = Object.getPrototypeOf(current) as typeof LitFeature | null;
+  }
+
+  chain.forEach((featureCtor) => {
+    if (featureCtor.styles) {
+      if (Array.isArray(featureCtor.styles)) {
+        styles.push(...featureCtor.styles);
+      } else {
+        styles.push(featureCtor.styles);
+      }
+    }
+  });
+
+  return styles;
+}
+
+function collectFeatureProperties(featureClass: typeof LitFeature): Record<string, PropertyDeclaration> {
+  const properties: Record<string, PropertyDeclaration> = {};
+  const chain: typeof LitFeature[] = [];
+  let current: typeof LitFeature | null = featureClass;
+
+  while (current && (current as any)[LIT_FEATURE_MARKER]) {
+    chain.unshift(current);
+
+    if (current === LitFeature) {
+      break;
+    }
+
+    current = Object.getPrototypeOf(current) as typeof LitFeature | null;
+  }
+
+  chain.forEach((featureCtor) => {
+    Object.assign(properties, featureCtor.properties || {});
+    const decoratorMeta = getFeaturePropertyMetadata(featureCtor);
+    Object.assign(properties, decoratorMeta || {});
+  });
+
+  return properties;
 }
 
 // ----------------------------------------------------------------------------
@@ -171,21 +223,18 @@ export function resolveFeatures(ctor: LitCoreConstructor): ResolvedFeatures {
 
     DebugUtils.logMeta('resolve-feature', `  → Resolving feature: ${name}`);
 
-    // Collect feature styles
-    if (definition.class.styles) {
-      DebugUtils.logMeta('resolve-styles', `    → Collecting styles from: ${name}`);
-      console.log(`[Resolver] Collecting styles from ${name}:`, definition.class.styles);
-      resolvedStyles.push(definition.class.styles);
+    // Collect feature styles from the full inheritance chain
+    const featureStyles = collectFeatureStyles(definition.class as unknown as typeof LitFeature);
+    if (featureStyles.length > 0) {
+      DebugUtils.logMeta(
+        'resolve-styles',
+        `    → Collecting ${featureStyles.length} style blocks from feature chain: ${name}`
+      );
+      resolvedStyles.push(...featureStyles);
     }
 
-    // Merge feature properties
-    let mergedProperties: Record<string, PropertyDeclaration> = {
-      ...(definition.class.properties || {})
-    };
-
-    // Include decorator properties
-    const decoratorMeta = getFeaturePropertyMetadata(definition.class);
-    Object.assign(mergedProperties, decoratorMeta || {});
+    // Merge feature properties from the full inheritance chain
+    let mergedProperties = collectFeatureProperties(definition.class as unknown as typeof LitFeature);
 
     // Apply property overrides from config
     if (featureConfig && typeof featureConfig === 'object' && featureConfig.properties) {
@@ -211,7 +260,7 @@ export function resolveFeatures(ctor: LitCoreConstructor): ResolvedFeatures {
 
     // Add to resolved features
     resolvedFeatures.set(name, {
-      class: definition.class as typeof LitFeature,
+      class: definition.class as unknown as typeof LitFeature,
       config: finalConfig
     });
   });

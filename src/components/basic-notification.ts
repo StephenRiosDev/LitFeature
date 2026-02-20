@@ -5,9 +5,7 @@ import { BaseDismissFeature } from '../features/base-dismiss-feature.js';
 
 /**
  * BasicNotification - Tier 3 Demo Component
- * 
  * Uses BaseDismissFeature for manual dismissal only.
- * 
  * @element basic-notification
  */
 @provide('Dismiss', {
@@ -22,17 +20,6 @@ export class BasicNotification extends LitCore {
   static override styles: CSSResultGroup = css`
     :host {
       display: block;
-    }
-
-    :host([dismissed]) {
-      animation: fadeOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
-    }
-
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        transform: scale(0.95);
-      }
     }
 
     .notification {
@@ -57,29 +44,6 @@ export class BasicNotification extends LitCore {
       line-height: 1.5;
     }
 
-    .dismiss-btn {
-      position: absolute;
-      top: 50%;
-      right: 12px;
-      transform: translateY(-50%);
-      width: 28px;
-      height: 28px;
-      border: none;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .dismiss-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-50%) scale(1.1);
-    }
   `;
 
   override render(): TemplateResult {
@@ -92,8 +56,8 @@ export class BasicNotification extends LitCore {
         ${this.dismissible ? html`
           <button
             class="dismiss-btn"
-            @click=${() => this.Dismiss.dismiss()}
-            aria-label="Dismiss"
+            @click=${this.Dismiss.handleDismissClick}
+            aria-label=${this.Dismiss.getDismissLabel()}
           >
             ×
           </button>

@@ -9,6 +9,8 @@ import { property } from '../root/decorators/feature-property.js';
 export interface RippleConfig extends FeatureConfig {
   /** Color of the ripple effect */
   rippleColor?: string;
+  /** Duration of the ripple animation in ms */
+  rippleDurationMs?: number;
 }
 
 /**
@@ -21,6 +23,9 @@ export class RippleFeature extends LitFeature<RippleConfig> {
   @property({ type: Boolean, reflect: true })
   rippling = false;
 
+  @property({ type: Number, attribute: 'ripple-duration' })
+  rippleDurationMs = 600;
+
   /**
    * Styles provided by this feature.
    * Automatically merged into host component styles.
@@ -31,8 +36,8 @@ export class RippleFeature extends LitFeature<RippleConfig> {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
-      animation: ripple 0.6s ease-out;
+      background: radial-gradient(circle, var(--ripple-color, rgba(255, 255, 255, 0.6)) 0%, transparent 70%);
+      animation: ripple var(--ripple-duration, 600ms) ease-out;
       pointer-events: none;
     }
 
@@ -48,6 +53,20 @@ export class RippleFeature extends LitFeature<RippleConfig> {
     }
   `;
 
+  constructor(host: LitCore, config: RippleConfig) {
+    super(host, config);
+    this.rippleDurationMs = config.rippleDurationMs ?? 600;
+    this._applyRippleOptions();
+  }
+
+  updated(changedProperties: Map<PropertyKey, unknown>): void {
+    super.updated(changedProperties);
+
+    if (changedProperties.has('rippleDurationMs')) {
+      this._applyRippleOptions();
+    }
+  }
+
   connectedCallback(): void {
     this.host.addEventListener('click', this._handleClick);
   }
@@ -56,10 +75,29 @@ export class RippleFeature extends LitFeature<RippleConfig> {
     this.host.removeEventListener('click', this._handleClick);
   }
 
-  private _handleClick = () => {
+  triggerRipple(): void {
     this.rippling = true;
     setTimeout(() => {
       this.rippling = false;
-    }, 600);
+    }, this.rippleDurationMs);
+  }
+
+  setRippleColor(color: string): void {
+    (this.host as HTMLElement).style.setProperty('--ripple-color', color);
+  }
+
+  private _handleClick = () => {
+    this.triggerRipple();
   };
+
+  private _applyRippleOptions(): void {
+    (this.host as HTMLElement).style.setProperty(
+      '--ripple-duration',
+      `${this.rippleDurationMs}ms`
+    );
+
+    if (this.config.rippleColor) {
+      this.setRippleColor(this.config.rippleColor);
+    }
+  }
 }
