@@ -9,7 +9,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
 
@@ -37,23 +37,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Debug build output
-      - name: Check dist folder
-        run: |
-          echo "Dist contents:"
-          ls -R ./dist
-
-      # Configure GitHub Pages
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      # Upload artifact for deployment
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          name: github-pages
-          path: ./dist
-
-      # Deploy Pages
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v3
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
