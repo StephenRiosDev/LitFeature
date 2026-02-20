@@ -190,9 +190,9 @@ export class HomePage extends LitElement {
           component libraries and design systems with Lit.
         </p>
         <div class="byline">A proposal by Stephen Rios</div>
-        <button class="cta-button" @click=${this._goToDemo}>
+        <a class="cta-button" href="demo">
           → View the Demo
-        </button>
+        </a>
       </div>
 
       <div class="content">
@@ -331,7 +331,6 @@ export class HomePage extends LitElement {
   }
 
   private _goToDemo(): void {
-    window.location.hash = 'demo';
     this.dispatchEvent(
       new CustomEvent('navigate', {
         detail: { page: 'demo' },

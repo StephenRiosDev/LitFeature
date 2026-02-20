@@ -2,6 +2,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import './nav-bar.js';
 import './home-page.js';
+import './docs-page.js';
 import './demo-page.js';
 import './stress-test.js';
 import './super-stress-test.js';
@@ -11,14 +12,16 @@ import './super-stress-test.js';
  * 
  * Main application routing layer that handles:
  * - Navigation between pages
- * - Hash-based routing
+ * - Path-based routing using History API
  * - Dynamic page loading
  * - Shared navigation bar
  */
 @customElement('app-router')
 export class AppRouter extends LitElement {
   @state()
-  private currentPage: 'home' | 'demo' | 'stress-test' | 'super-stress-test' = 'home';
+  private currentPage: 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test' = 'home';
+
+  private baseUrl = import.meta.env.BASE_URL;
 
   static override styles = css`
     :host {
@@ -56,26 +59,49 @@ export class AppRouter extends LitElement {
 
   constructor() {
     super();
-    this.handleHashChange();
-    window.addEventListener('hashchange', () => this.handleHashChange());
+    this.handleRouteChange();
+    window.addEventListener('popstate', () => this.handleRouteChange());
   }
 
-  private handleHashChange() {
-    const hash = window.location.hash.slice(1) || 'home';
-    const validPages: Record<string, 'home' | 'demo' | 'stress-test' | 'super-stress-test'> = {
+  private handleRouteChange() {
+    // Remove base URL from pathname to get the route
+    let path = window.location.pathname;
+    if (path.startsWith(this.baseUrl)) {
+      path = path.slice(this.baseUrl.length);
+    }
+    // Remove leading slash and default to 'home'
+    path = path.replace(/^\//, '') || 'home';
+    
+    const validPages: Record<string, 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test'> = {
+      '': 'home',
       home: 'home',
+      docs: 'docs',
       demo: 'demo',
       'stress-test': 'stress-test',
       'super-stress-test': 'super-stress-test',
     };
-    this.currentPage = validPages[hash] || 'home';
+    
+    const newPage = validPages[path] || 'home';
+    const isPageChanging = this.currentPage !== newPage;
+    this.currentPage = newPage;
+    
+    // If navigating to a new page, scroll to top
+    if (isPageChanging) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   private handleNavigate(e: Event) {
     const event = e as CustomEvent<{ page: string }>;
-    const page = event.detail.page as 'home' | 'demo' | 'stress-test' | 'super-stress-test';
-    this.currentPage = page;
-    window.location.hash = page === 'home' ? '' : page;
+    const page = event.detail.page as 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test';
+    const route = page === 'home' ? '' : page;
+    const fullPath = `${this.baseUrl}${route}`;
+    
+    if (this.currentPage !== page) {
+      this.currentPage = page;
+      window.history.pushState({}, '', fullPath);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   override render() {
@@ -94,6 +120,8 @@ export class AppRouter extends LitElement {
     switch (this.currentPage) {
       case 'home':
         return html`<home-page></home-page>`;
+      case 'docs':
+        return html`<docs-page></docs-page>`;
       case 'demo':
         return html`<demo-page></demo-page>`;
       case 'stress-test':

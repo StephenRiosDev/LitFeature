@@ -10,7 +10,9 @@ import { customElement, property } from 'lit/decorators.js';
 @customElement('nav-bar')
 export class NavBar extends LitElement {
   @property()
-  currentPage: 'home' | 'demo' | 'stress-test' | 'super-stress-test' = 'home';
+  currentPage: 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test' = 'home';
+
+  private baseUrl = import.meta.env.BASE_URL;
 
   static override styles = css`
     :host {
@@ -97,7 +99,7 @@ export class NavBar extends LitElement {
     }
   `;
 
-  private handleNavigation(page: 'home' | 'demo' | 'stress-test' | 'super-stress-test') {
+  private handleNavigation(page: 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test') {
     this.currentPage = page;
     this.dispatchEvent(
       new CustomEvent('navigate', {
@@ -117,7 +119,7 @@ export class NavBar extends LitElement {
         <ul class="nav-links">
           <li>
             <a
-              href="#home"
+              href="${this.baseUrl}"
               @click=${(e: Event) => {
                 e.preventDefault();
                 this.handleNavigation('home');
@@ -129,7 +131,7 @@ export class NavBar extends LitElement {
           </li>
           <li>
             <a
-              href="#demo"
+              href="${this.baseUrl}demo"
               @click=${(e: Event) => {
                 e.preventDefault();
                 this.handleNavigation('demo');
@@ -141,7 +143,19 @@ export class NavBar extends LitElement {
           </li>
           <li>
             <a
-              href="#stress-test"
+              href="${this.baseUrl}docs"
+              @click=${(e: Event) => {
+                e.preventDefault();
+                this.handleNavigation('docs');
+              }}
+              class=${this.currentPage === 'docs' ? 'active' : ''}
+            >
+              Docs
+            </a>
+          </li>
+          <li>
+            <a
+              href="${this.baseUrl}stress-test"
               @click=${(e: Event) => {
                 e.preventDefault();
                 this.handleNavigation('stress-test');
@@ -153,7 +167,7 @@ export class NavBar extends LitElement {
           </li>
           <li>
             <a
-              href="#super-stress-test"
+              href="${this.baseUrl}super-stress-test"
               @click=${(e: Event) => {
                 e.preventDefault();
                 this.handleNavigation('super-stress-test');

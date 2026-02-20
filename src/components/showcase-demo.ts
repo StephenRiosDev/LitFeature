@@ -675,7 +675,7 @@ export class ShowcaseDemo extends LitCore {
           <a class="cta-button" href="https://github.com/StephenRiosDev/LitFeature" target="_blank">
             View on GitHub
           </a>
-          <a class="cta-button secondary" href="#documentation">
+          <a class="cta-button secondary" href="docs">
             Read the Docs
           </a>
         </div>
