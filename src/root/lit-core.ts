@@ -49,11 +49,19 @@ export class LitCore extends LitElement {
 
   /**
    * Lit's class finalization hook.
-   * We override this to merge feature properties into the class properties map.
+   * We override this to merge feature properties and styles into the class.
    */
   static finalize(): void {
     const ctor = this as unknown as LitCoreConstructor;
     const resolved = resolveFeatures(ctor);
+    
+    console.log(`[LitCore] Finalizing ${this.name}`, {
+      featureStyles: resolved.styles,
+      featureCount: resolved.styles.length,
+      featureStyleTypes: resolved.styles.map(s => s?.constructor?.name || typeof s)
+    });
+    
+    // Merge feature properties
     const superProps = (Object.getPrototypeOf(this) as typeof LitElement)?.properties || {};
     const ownProps = Object.prototype.hasOwnProperty.call(this, 'properties') ? this.properties : {};
 
@@ -62,6 +70,55 @@ export class LitCore extends LitElement {
       ...resolved.properties,
       ...ownProps
     };
+
+    // Merge feature styles BEFORE calling super.finalize()
+    const superStyles = (Object.getPrototypeOf(this) as typeof LitElement)?.styles;
+    // Check if this class directly defines styles (not inherited)
+    const hasOwnStyles = Object.getOwnPropertyDescriptor(this, 'styles') !== undefined;
+    const ownStyles = hasOwnStyles ? this.styles : undefined;
+    
+    console.log(`[LitCore] Style sources for ${this.name}:`, {
+      superStyles: !!superStyles,
+      superStylesType: Array.isArray(superStyles) ? 'array' : typeof superStyles,
+      featureStyles: resolved.styles.length,
+      hasOwnStyles,
+      ownStyles: !!ownStyles,
+      ownStylesType: Array.isArray(ownStyles) ? 'array' : typeof ownStyles
+    });
+    
+    // Build flat array of styles
+    const allStyles = [];
+    
+    // Handle superStyles - could be single CSSResult or array
+    if (superStyles) {
+      if (Array.isArray(superStyles)) {
+        allStyles.push(...superStyles);
+      } else {
+        allStyles.push(superStyles);
+      }
+    }
+    
+    // Add feature styles
+    if (resolved.styles.length > 0) {
+      allStyles.push(...resolved.styles);
+    }
+    
+    // Handle ownStyles - could be single CSSResult or array
+    if (ownStyles) {
+      if (Array.isArray(ownStyles)) {
+        allStyles.push(...ownStyles);
+      } else {
+        allStyles.push(ownStyles);
+      }
+    }
+    
+    console.log(`[LitCore] Total styles for ${this.name}:`, allStyles.length, allStyles);
+    
+    // Set the static styles property on the class (not instance)
+    // This must be done before calling super.finalize() which processes styles
+    if (allStyles.length > 0) {
+      (this as any).styles = allStyles.length === 1 ? allStyles[0] : allStyles;
+    }
 
     super.finalize();
   }

@@ -243,27 +243,27 @@ export class HomePage extends LitElement {
           <h2>Built-in Features</h2>
           <div class="feature-grid">
             <div class="feature-card">
-              <h3>StatusFeature</h3>
+              <h3>RippleFeature</h3>
               <p>
-                Manages visual status indicators (info, success, warning, error) with icons and semantic colors.
+                Adds click feedback to multiple components with a single, reusable feature.
               </p>
             </div>
             <div class="feature-card">
-              <h3>VisibilityFeature</h3>
+              <h3>PulseFeature</h3>
               <p>
-                Handles show/hide state with smooth transitions and animation callbacks.
+                Drives attention states with a simple reactive animation toggle.
               </p>
             </div>
             <div class="feature-card">
-              <h3>DismissFeature</h3>
+              <h3>ThemeFeature</h3>
               <p>
-                Provides dismissal functionality with close buttons and dismiss callbacks.
+                Manages theme variants and CSS variables with optional system preference support.
               </p>
             </div>
             <div class="feature-card">
-              <h3>TimerFeature</h3>
+              <h3>Dismiss Feature Chain</h3>
               <p>
-                Countdown timer with progress tracking, pause/resume controls, and auto-dismissal.
+                Base, auto-dismiss, and swipe-to-dismiss behaviors layered via feature inheritance.
               </p>
             </div>
           </div>
@@ -271,23 +271,20 @@ export class HomePage extends LitElement {
 
         <!-- Component Hierarchy -->
         <section class="section">
-          <h2>Hierarchical Composition</h2>
+          <h2>Feature Tiers in the Demo</h2>
           <p>
-            The demo shows a 4-level inheritance hierarchy where each level adds a new feature while maintaining and
-            configuring all inherited features:
+            The demo is organized into tiers that show how features layer across different component types:
           </p>
           <div class="code-block">
-            <div><strong>Level 1:</strong> message-base → <span class="highlight">provides StatusFeature</span></div>
+            <div><strong>Tier 1:</strong> simple-button / simple-card → <span class="highlight">provide RippleFeature</span></div>
             <div style="margin-top: 8px;">    ↓</div>
-            <div style="margin-top: 8px;"><strong>Level 2:</strong> message-box → <span class="highlight">provides VisibilityFeature</span> + configures Status</div>
+            <div style="margin-top: 8px;"><strong>Tier 2:</strong> themed-card / themed-button / themed-panel → <span class="highlight">provide ThemeFeature</span></div>
             <div style="margin-top: 8px;">    ↓</div>
-            <div style="margin-top: 8px;"><strong>Level 3:</strong> alert-box → <span class="highlight">provides DismissFeature</span> + configures Status &amp; Visibility</div>
-            <div style="margin-top: 8px;">    ↓</div>
-            <div style="margin-top: 8px;"><strong>Level 4:</strong> toast-notification → <span class="highlight">provides TimerFeature</span> + configures all</div>
+            <div style="margin-top: 8px;"><strong>Tier 3:</strong> basic/auto/swipe notifications → <span class="highlight">use Dismiss feature inheritance</span></div>
           </div>
           <p>
-            This demonstrates how features cleanly layer without mixin complexity, and how subclasses can reconfigure
-            inherited feature behavior.
+            This demonstrates how features can be shared across unrelated components and extended through inheritance
+            without deep mixin stacks.
           </p>
         </section>
 

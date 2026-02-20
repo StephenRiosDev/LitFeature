@@ -1,19 +1,15 @@
-import { html, TemplateResult } from 'lit';
+import { html, TemplateResult, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import './notification-demo.js';
+import './showcase-demo.js';
 
 /**
  * DemoPage Component
  * 
- * Wrapper for the notification demo
+ * Wrapper for the showcase demo
  */
 @customElement('demo-page')
-export class DemoPage extends HTMLElement {
-  connectedCallback(): void {
-    this.innerHTML = '<notification-demo></notification-demo>';
-  }
-
-  render(): TemplateResult {
-    return html`<notification-demo></notification-demo>`;
+export class DemoPage extends LitElement {
+  override render(): TemplateResult {
+    return html`<showcase-demo></showcase-demo>`;
   }
 }

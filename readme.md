@@ -73,6 +73,14 @@ At runtime, `PrimaryButton` instances have:
 - `this.Ripple` — newly provided ripple behavior
 - Reactive properties from both features available on the host
 
+## Showcase demo
+
+The current demo focuses on three tiers of feature usage:
+
+- **Tier 1:** `RippleFeature` + `PulseFeature` across simple button/card/badge components
+- **Tier 2:** `ThemeFeature` across themed card/button/panel components
+- **Tier 3:** Dismiss feature inheritance (`BaseDismissFeature` → `AutoDismissFeature` → `SwipeDismissFeature`) powering three notification variants
+
 ## How the POC works (today)
 
 ### 1) Providing a feature
@@ -308,7 +316,12 @@ npm install
 npm run dev
 ```
 
-Then open the Vite dev server URL and look for `<feature-demo-element>`.
+Then open the Vite dev server URL and use the navigation bar to explore:
+- Home (overview)
+- Demo (showcase page)
+- Stress Test / Super Stress Test
+
+You can also jump directly to the showcase with `/#demo`.
 
 ## Dependencies
 

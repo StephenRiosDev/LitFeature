@@ -155,6 +155,7 @@ export function resolveFeatures(ctor: LitCoreConstructor): ResolvedFeatures {
 
   // Build final resolved state
   const resolvedProperties: Record<string, PropertyDeclaration> = {};
+  const resolvedStyles: any[] = [];
   const resolvedFeatures = new Map<string, { class: typeof LitFeature; config: FeatureConfig }>();
 
   DebugUtils.logMeta('resolve-build', `Building resolved state for ${provides.size} provided features`);
@@ -169,6 +170,13 @@ export function resolveFeatures(ctor: LitCoreConstructor): ResolvedFeatures {
     }
 
     DebugUtils.logMeta('resolve-feature', `  → Resolving feature: ${name}`);
+
+    // Collect feature styles
+    if (definition.class.styles) {
+      DebugUtils.logMeta('resolve-styles', `    → Collecting styles from: ${name}`);
+      console.log(`[Resolver] Collecting styles from ${name}:`, definition.class.styles);
+      resolvedStyles.push(definition.class.styles);
+    }
 
     // Merge feature properties
     let mergedProperties: Record<string, PropertyDeclaration> = {
@@ -210,14 +218,18 @@ export function resolveFeatures(ctor: LitCoreConstructor): ResolvedFeatures {
 
   const resolved: ResolvedFeatures = {
     properties: Object.freeze(resolvedProperties),
+    styles: resolvedStyles,
     features: resolvedFeatures
   };
+
+  console.log(`[Resolver] Resolved styles for ${constructorName}:`, resolved.styles, `(count: ${resolved.styles.length})`);
 
   Object.freeze(resolved);
 
   DebugUtils.logMeta('resolve-complete', `Resolution complete for ${constructorName}`, {
     featuresCount: resolvedFeatures.size,
-    propertiesCount: Object.keys(resolvedProperties).length
+    propertiesCount: Object.keys(resolvedProperties).length,
+    stylesCount: resolvedStyles.length
   });
 
   // Cache and return

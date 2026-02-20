@@ -10,7 +10,7 @@ The system allows component authors to:
 - **Provide** reusable features (controllers) at any level in a class hierarchy
 - **Configure** or **disable** inherited features in subclasses
 - Define reactive properties within features that seamlessly merge into the host component
-- Compose multiple concerns (status indicators, dismissal logic, timers, visibility management) without deep mixin chains
+- Compose multiple concerns (ripple/pulse feedback, theming, dismissal workflows) without deep mixin chains
 
 **Integration Goal:** The architecture demonstrated in this POC (`LitCore`, `LitFeature`, decorators, and `FeatureManager`) would be integrated directly into `LitElement` and `ReactiveElement`, making features a native part of Lit's component model rather than a separate library.
 
@@ -21,7 +21,7 @@ The system allows component authors to:
 A **Feature** is a specialized `ReactiveController` that:
 1. **Implements `ReactiveController`** - participates in host lifecycle
 2. **Declares reactive properties** - properties that merge into the host's property system
-3. **Encapsulates single-responsibility behavior** - dismissal, timing, status management, etc.
+3. **Encapsulates single-responsibility behavior** - feedback, theming, dismissal, etc.
 4. **Is inheritable and configurable** - subclasses can reconfigure or disable features
 5. **Supports standard JavaScript class inheritance** - features can extend other feature classes or base classes, inheriting properties and methods for more granular control
 
@@ -30,7 +30,7 @@ A **Feature** is a specialized `ReactiveController` that:
 1. **Declarative Composition**: Features are declared via class decorators or static getters, not imperatively instantiated
 2. **Inheritance-Aware**: Features flow down class hierarchies and can be reconfigured at each level
 3. **Property Integration**: Feature properties become host properties automatically
-4. **Single Responsibility**: Each feature manages one concern (status, visibility, timer, dismissal)
+4. **Single Responsibility**: Each feature manages one concern (ripple/pulse feedback, theme, dismissal)
 5. **Inter-Feature Communication**: Features can discover and communicate with other features on the same host
 6. **Class-Based Extensibility**: Features leverage standard JavaScript class inheritance, allowing custom feature subclasses with specialized properties and methods for more granular control
 
@@ -38,41 +38,36 @@ A **Feature** is a specialized `ReactiveController` that:
 
 Features support standard JavaScript class inheritance, enabling developers to create feature subclasses that extend base features with specialized properties and methods. This provides another vector for fine-grained control while maintaining all the benefits of the feature system.
 
-**Example: Extending StatusFeature**
+**Example: Extending BaseDismissFeature**
 
 ```typescript
 // Base feature in library
-export class StatusFeature extends LitFeature {
-  @property({ type: String, reflect: true })
-  status: StatusType = 'info';
-  
-  getStatusIcon(): string { /* ... */ }
-  getStatusColor(): string { /* ... */ }
+export class BaseDismissFeature extends LitFeature {
+  @property({ type: Boolean, reflect: true })
+  dismissible = true;
+
+  dismiss(): void { /* ... */ }
 }
 
 // Custom subclass in application code
-export class ExtendedStatusFeature extends StatusFeature {
-  @property({ type: Boolean })
-  showStatusLabel: boolean = false;
-  
-  // Extended method with custom behavior
-  getStatusIcon(): string {
-    const baseIcon = super.getStatusIcon();
-    return this.showStatusLabel ? `${baseIcon} ${this.status}` : baseIcon;
+export class AnalyticsDismissFeature extends BaseDismissFeature {
+  @property({ type: String })
+  dismissSource: 'manual' | 'auto' = 'manual';
+
+  override dismiss(): void {
+    this.dismissSource = 'manual';
+    super.dismiss();
   }
-  
-  // New method specific to extended feature
-  getStatusHeight(): 'large' | 'small' {
-    return this.showStatusLabel ? 'large' : 'small';
-  }
+
+  trackDismiss(): void { /* ... */ }
 }
 
 // Use custom feature in component
-@provide('Status', { class: ExtendedStatusFeature })
-class CustomMessageBox extends LitCore {
-  declare Status: ExtendedStatusFeature;
-  declare status: string;
-  declare showStatusLabel: boolean;
+@provide('Dismiss', { class: AnalyticsDismissFeature })
+class CustomNotice extends LitCore {
+  declare Dismiss: AnalyticsDismissFeature;
+  declare dismissible: boolean;
+  declare dismissSource: 'manual' | 'auto';
 }
 ```
 
@@ -85,84 +80,59 @@ class CustomMessageBox extends LitCore {
 ## Features in the Codebase
 
 
-This POC implements four example features that demonstrate the pattern:
+This POC implements a small set of demo features used by the showcase:
 
-### 1. StatusFeature
-**Purpose:** Manages visual status/severity indicators
+### 1. RippleFeature
+**Purpose:** Adds click feedback with a material-style ripple.
 
 **Properties:**
-- `status: StatusType` - One of: 'info', 'success', 'warning', 'error'
-- `showIcon: boolean` - Whether to display status icon
-- `statusStyles: StatusStyles` - Computed CSS class map
-
-**Methods:**
-- `getStatusIcon(): string` - Returns unicode icon for current status
-- `getStatusColor(): string` - Returns CSS color variable
+- `rippling: boolean` - Reflects when the ripple animation is active
 
 **Demonstrates:**
-- Reactive properties with reflection
+- Feature-provided styles
+- Host event wiring
+- Minimal reactive property surface
+
+### 2. PulseFeature
+**Purpose:** Adds a pulsing attention state.
+
+**Properties:**
+- `pulsing: boolean` - Toggles CSS animation
+
+**Methods:**
+- `togglePulse()` - Convenience toggle
+
+**Demonstrates:**
 - Config-driven defaults
-- Computed properties
-- Lifecycle hooks (`updated`)
+- CSS animation control via reactive properties
 
-### 2. VisibilityFeature
-**Purpose:** Manages show/hide state with transition effects
-
-**Properties:**
-- `visible: boolean` - Current visibility state
-- `transitioning: boolean` - Whether currently animating
-
-**Methods:**
-- `show()` - Show component with animation
-- `hide()` - Hide component with animation
-- `toggle()` - Toggle visibility state
-- `getTransitionStyles(): string` - Get inline styles for transitions
-
-**Demonstrates:**
-- Boolean state management
-- Public API methods
-- Config callbacks (`onVisibilityChange`)
-- Lifecycle hooks (`afterFirstUpdated`)
-
-### 3. DismissFeature
-**Purpose:** Provides dismissal functionality with callbacks and events
+### 3. ThemeFeature
+**Purpose:** Theme management with system preference support.
 
 **Properties:**
-- `dismissible: boolean` - Whether dismissal is enabled
-- `dismissed: boolean` - Whether component has been dismissed
+- `theme: 'light' | 'dark' | 'auto'`
+- `colors: ThemeColors` - Computed palette
+- `systemTheme: 'light' | 'dark'`
 
 **Methods:**
-- `dismiss(): boolean` - Attempt to dismiss (returns success)
-- `getDismissLabel(): string` - Get accessible label for dismiss button
+- `toggleTheme()`
+- `getResolvedTheme()`
 
 **Demonstrates:**
-- Feature-to-feature communication (integrates with `VisibilityFeature`)
-- Preventable actions via callbacks (`onBeforeDismiss`)
-- Custom events with `composed: true`
-- Lifecycle hooks (`beforeDisconnectedCallback`)
+- Decorator + static property declarations
+- Lifecycle hooks (`connectedCallback`, `updated`)
+- CSS variable propagation
 
-### 4. TimerFeature
-**Purpose:** Countdown timer with progress tracking and auto-actions
+### 4. Dismiss Feature Inheritance
+**Purpose:** Manual, timed, and swipe-based dismissal using multi-level feature inheritance.
 
-**Properties:**
-- `duration: number` - Total duration in milliseconds
-- `remaining: number` - Time remaining
-- `progress: number` - Progress ratio (0-1)
-- `running: boolean` - Whether timer is active
-- `paused: boolean` - Whether timer is paused
-
-**Methods:**
-- `start()` - Start/resume timer
-- `pause()` - Pause timer
-- `stop()` - Stop and reset timer
-- `reset()` - Reset to duration
+**Chain:**
+- `BaseDismissFeature` → `AutoDismissFeature` → `SwipeDismissFeature`
 
 **Demonstrates:**
-- Complex state management
-- Resource cleanup in `disconnectedCallback`
-- Feature-to-feature integration (auto-dismiss via `DismissFeature`)
-- Lifecycle hooks (`beforeConnectedCallback`, `afterConnectedCallback`)
-- Progress callbacks
+- Feature inheritance in practice
+- Host event listeners for gesture handling
+- Custom events for dismissal source tracking
 
 ## How It Works
 
@@ -184,10 +154,10 @@ This POC implements four example features that demonstrate the pattern:
 │         ↓                                                    │
 │   LitFeature (base)                                         │
 │         │                                                    │
-│         ├─── StatusFeature                                  │
-│         ├─── VisibilityFeature                              │
-│         ├─── DismissFeature                                 │
-│         └─── TimerFeature                                   │
+│         ├─── RippleFeature                                  │
+│         ├─── PulseFeature                                   │
+│         ├─── ThemeFeature                                   │
+│         └─── BaseDismissFeature → AutoDismissFeature → SwipeDismissFeature │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -297,33 +267,33 @@ private _initializeFeatures(): void {
 #### `@provide(name, definition)`
 Declares that a class provides a feature:
 ```typescript
-@provide('Status', {
-  class: StatusFeature,
-  config: { defaultStatus: 'info', showIcon: true }
+@provide('Theme', {
+  class: ThemeFeature,
+  config: { defaultTheme: 'light', respectSystemTheme: true }
 })
-export class MessageBase extends LitCore {}
+export class ThemedCard extends LitCore {}
 ```
 
 #### `@configure(name, options | 'disable')`
 Configures or disables an inherited feature:
 ```typescript
-@configure('Status', {
-  config: { defaultStatus: 'success' },
-  properties: { showIcon: 'disable' }
+@configure('Theme', {
+  config: { defaultTheme: 'dark' },
+  properties: { systemTheme: 'disable' }
 })
-export class SuccessMessage extends MessageBase {}
+export class DarkCard extends ThemedCard {}
 
 // Or disable entirely:
-@configure('Status', 'disable')
-export class NoStatusMessage extends MessageBase {}
+@configure('Pulse', 'disable')
+export class NoPulseBadge extends LitCore {}
 ```
 
 #### `@property(options)` (on feature classes)
 Declares reactive properties within features:
 ```typescript
-export class StatusFeature extends LitFeature {
+export class ThemeFeature extends LitFeature {
   @property({ type: String, reflect: true })
-  status: StatusType = 'info';
+  theme: 'light' | 'dark' | 'auto' = 'light';
 }
 ```
 
@@ -331,55 +301,48 @@ export class StatusFeature extends LitFeature {
 
 **Inheritance Chain:**
 ```typescript
-// Level 1: Base provides Status
-@provide('Status', { class: StatusFeature })
-class MessageBase extends LitCore {
-  declare Status: StatusFeature;
-  declare status: string;  // From StatusFeature
+// Tier 1: Provide click feedback
+@provide('Ripple', { class: RippleFeature })
+class SimpleButton extends LitCore {
+  declare Ripple: RippleFeature;
+  declare rippling: boolean;
 }
 
-// Level 2: Add Visibility
-@provide('Visibility', { class: VisibilityFeature })
-class MessageBox extends MessageBase {
-  declare Visibility: VisibilityFeature;
-  declare visible: boolean;  // From VisibilityFeature
+// Tier 2: Provide theme with configuration overrides
+@provide('Theme', { class: ThemeFeature, config: { defaultTheme: 'auto' } })
+class ThemedPanel extends LitCore {
+  declare Theme: ThemeFeature;
+  declare theme: 'light' | 'dark' | 'auto';
 }
 
-// Level 3: Add Dismiss, configure Status
-@provide('Dismiss', { class: DismissFeature })
-@configure('Status', { config: { defaultStatus: 'error' } })
-class AlertBox extends MessageBox {
-  declare Dismiss: DismissFeature;
-  declare dismissible: boolean;  // From DismissFeature
-  // status now defaults to 'error' instead of 'info'
+// Tier 3: Swap in different dismiss feature classes
+@provide('Dismiss', { class: BaseDismissFeature })
+class BasicNotification extends LitCore {
+  declare Dismiss: BaseDismissFeature;
+  declare dismissed: boolean;
 }
 
-// Level 4: Add Timer, reconfigure all features
-@provide('Timer', { class: TimerFeature })
-@configure('Status', { config: { defaultStatus: 'info' } })
-@configure('Dismiss', { config: { autoDismiss: true } })
-class ToastNotification extends AlertBox {
-  declare Timer: TimerFeature;
-  declare duration: number;  // From TimerFeature
-  declare running: boolean;  // From TimerFeature
-  // Now has all 4 features with custom configuration
+@provide('Dismiss', { class: AutoDismissFeature, config: { autoDismiss: true } })
+class AutoNotification extends LitCore {
+  declare Dismiss: AutoDismissFeature;
+  declare dismissed: boolean;
+}
+
+@provide('Dismiss', { class: SwipeDismissFeature, config: { swipeToDismiss: true } })
+class SwipeNotification extends LitCore {
+  declare Dismiss: SwipeDismissFeature;
+  declare dismissed: boolean;
 }
 ```
 
 **At runtime:**
 ```typescript
-const toast = new ToastNotification();
+const notice = new SwipeNotification();
 // All feature instances available:
-toast.Status.getStatusIcon();
-toast.Visibility.toggle();
-toast.Dismiss.dismiss();
-toast.Timer.start();
+notice.Dismiss.dismiss();
 
 // All feature properties available on host:
-toast.status = 'success';
-toast.visible = true;
-toast.dismissible = true;
-toast.duration = 3000;
+notice.dismissed = false;
 ```
 
 ## Integration Plan for Lit Core
@@ -507,9 +470,9 @@ The `@property` decorator integration is key to making features feel native to L
 
 Features use a separate `@property` decorator from `'./decorators/feature-property.js'`:
 ```typescript
-export class StatusFeature extends LitFeature {
+export class ThemeFeature extends LitFeature {
   @property({ type: String, reflect: true })
-  status: StatusType = 'info';
+  theme: 'light' | 'dark' | 'auto' = 'light';
 }
 ```
 
@@ -626,7 +589,7 @@ static get provide() { return { Feature: definition }; }
 
 **Question:** Should features be stored as `this.FeatureName` or in a namespace like `this.features.FeatureName`?
 
-**Current POC:** Direct properties (`this.Status`, `this.Timer`)
+**Current POC:** Direct properties (`this.Theme`, `this.Dismiss`)
 
 **Alternatives:**
 ```typescript
@@ -634,10 +597,10 @@ static get provide() { return { Feature: definition }; }
 this.Status.getStatusIcon();
 
 // Option B: Namespaced
-this.features.Status.getStatusIcon();
+this.features.Theme.getResolvedTheme();
 
 // Option C: Private with accessors
-this._features.get('Status').getStatusIcon();
+this._features.get('Theme').getResolvedTheme();
 ```
 
 **Trade-offs:**
@@ -653,10 +616,10 @@ this._features.get('Status').getStatusIcon();
 
 **Current approach:**
 ```typescript
-@provide('Status', { class: StatusFeature })
+@provide('Theme', { class: ThemeFeature })
 class MyElement extends LitCore {
-  declare Status: StatusFeature;  // Manual declaration
-  declare status: string;         // Manual declaration of feature properties
+  declare Theme: ThemeFeature;  // Manual declaration
+  declare theme: 'light' | 'dark' | 'auto';
 }
 ```
 
@@ -670,7 +633,7 @@ class MyElement extends LitCore {
 1. **Vue-style defineComponent helper:**
    ```typescript
    export const MyElement = defineComponent(LitCore)
-     .withFeature('Status', StatusFeature)
+     .withFeature('Theme', ThemeFeature)
      .build();
    // Type inference from builder pattern
    ```
@@ -716,8 +679,8 @@ if (otherFeature) {
 **Alternative:** Explicit dependency declaration
 ```typescript
 @provide('Dismiss', {
-  class: DismissFeature,
-  requires: ['Visibility']  // ← Enforce at resolution time
+  class: SwipeDismissFeature,
+  requires: ['Theme']  // ← Enforce at resolution time
 })
 ```
 
@@ -733,13 +696,13 @@ if (otherFeature) {
 
 **Current:** Features can only be disabled at configuration time
 ```typescript
-@configure('Timer', 'disable')
+@configure('Pulse', 'disable')
 ```
 
 **Potential:** Runtime disabling
 ```typescript
-this.featureManager.disableFeature('Timer');
-this.featureManager.enableFeature('Timer');
+this.featureManager.disableFeature('Pulse');
+this.featureManager.enableFeature('Pulse');
 ```
 
 **Use case:** Toggle features based on runtime conditions (permissions, feature flags, etc.)
@@ -774,7 +737,7 @@ class ComplexFeature extends Feature {
 
 **Alternatives:**
 1. Throw error at finalize time
-2. Namespace properties automatically (e.g., `Timer_duration`, `Animation_duration`)
+2. Namespace properties automatically (e.g., `Theme_primary`, `Animation_duration`)
 3. Require explicit resolution via `@configure`
 
 **Recommendation:** **Throw error at finalize time** (fail fast). Property collisions indicate poor feature design or naming. Developers should resolve by:
@@ -791,13 +754,13 @@ class ComplexFeature extends Feature {
 **Key point:** Features and controllers coexist:
 ```typescript
 class MyElement extends LitElement {
-  @provide('Timer', { class: TimerFeature })
+  @provide('Theme', { class: ThemeFeature })
   static provide = { ... };
   
   // Also use traditional controllers
   private _mouseController = new MouseController(this);
   
-  // Timer feature available as this.Timer
+  // Theme feature available as this.Theme
   // Mouse controller used traditionally
 }
 ```
@@ -808,7 +771,7 @@ class MyElement extends LitElement {
 
 ### Phase 1: POC Refinement (Current)
 - [x] Implement core architecture (LitCore, LitFeature, FeatureManager)
-- [x] Create example features (Status, Visibility, Dismiss, Timer)
+- [x] Create example features (Ripple, Pulse, Theme, Dismiss chain)
 - [x] Demonstrate inheritance chain
 - [x] Support both decorators and static getters
 - [x] Create working demo components
@@ -898,4 +861,4 @@ The POC demonstrates that this pattern is technically feasible, ergonomic, and p
 **POC Repository:** LitFeature  
 **Primary Contact:** [Add contact info]  
 **Status:** Proposal / Proof of Concept  
-**Date:** February 18, 2026
+**Date:** February 19, 2026

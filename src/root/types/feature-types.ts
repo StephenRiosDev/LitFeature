@@ -1,6 +1,6 @@
 import type { LitCore } from '../lit-core.js';
 import type { LitFeature, FeatureConfig, FeatureProperties } from '../lit-feature.js';
-import type { PropertyDeclaration } from 'lit';
+import type { PropertyDeclaration, CSSResultGroup } from 'lit';
 
 /**
  * Type for a feature class constructor
@@ -8,6 +8,7 @@ import type { PropertyDeclaration } from 'lit';
 export interface FeatureClass<TConfig extends FeatureConfig = FeatureConfig> {
   new (host: LitCore, config: TConfig): LitFeature<TConfig>;
   properties?: FeatureProperties;
+  styles?: CSSResultGroup;
 }
 
 /**
@@ -52,6 +53,8 @@ export interface FeatureMeta {
 export interface ResolvedFeatures {
   /** All properties from all enabled features */
   properties: Record<string, PropertyDeclaration>;
+  /** All styles from all enabled features */
+  styles: CSSResultGroup[];
   /** All enabled features with their final config */
   features: Map<string, {
     class: typeof LitFeature;

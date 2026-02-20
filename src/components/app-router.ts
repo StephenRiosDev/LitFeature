@@ -2,7 +2,7 @@ import { html, css, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import './nav-bar.js';
 import './home-page.js';
-import './notification-demo.js';
+import './demo-page.js';
 import './stress-test.js';
 import './super-stress-test.js';
 
@@ -95,7 +95,7 @@ export class AppRouter extends LitElement {
       case 'home':
         return html`<home-page></home-page>`;
       case 'demo':
-        return html`<notification-demo></notification-demo>`;
+        return html`<demo-page></demo-page>`;
       case 'stress-test':
         return html`<stress-test></stress-test>`;
       case 'super-stress-test':

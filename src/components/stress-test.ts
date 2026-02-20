@@ -2,23 +2,22 @@ import { html, css, TemplateResult, CSSResultGroup, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';
 import { performanceMonitor } from '../root/performance-monitor.js';
 
-// Import all notification components
-import './message-base.js';
-import './message-box.js';
-import './alert-box.js';
-import './toast-notification.js';
-
-import type { StatusType } from '../features/status-feature.js';
+// Import showcase components used for stress testing
+import './simple-button.js';
+import './simple-card.js';
+import './simple-badge.js';
+import './themed-card.js';
+import './themed-button.js';
+import './themed-panel.js';
+import './basic-notification.js';
+import './auto-notification.js';
+import './swipe-notification.js';
 
 /**
  * Stress Test Component
  * 
  * Creates 50+ components of varying complexity to stress-test the LitFeature system.
- * Includes:
- * - 20 simple message-base components
- * - 15 message-box components (with VisibilityFeature)
- * - 15 alert-box components (with multiple features)
- * - Some with auto-dismiss timers
+ * Includes simple, themed, and notification components used in the showcase demo.
  * 
  * Monitors performance throughout and logs only when there are potential
  * slowdowns or issues, assuming the system could scale to 2500+ components.
@@ -33,10 +32,9 @@ export class StressTest extends LitElement {
   private _components: Array<{
     id: number;
     type: 'simple' | 'medium' | 'complex';
-    status: StatusType;
+    kind: string;
+    title?: string;
     message: string;
-    visible?: boolean;
-    hasTimer?: boolean;
   }> = [];
 
   @state()
@@ -321,7 +319,7 @@ export class StressTest extends LitElement {
         <div class="header">
           <h1>🔥 LitFeature Stress Test</h1>
           <p class="subtitle">
-            Rendering 50+ components with varying complexity to identify performance bottlenecks
+            Rendering 50+ showcase components with varying complexity to identify performance bottlenecks
             and scaling limitations. Assuming potential scale to 2500+ components.
           </p>
 
@@ -396,15 +394,15 @@ export class StressTest extends LitElement {
 
     return html`
       <div class="section">
-        ${this._renderComponentGroup('Simple Components (Message Base)', 'simple', groupedByType.simple)}
+        ${this._renderComponentGroup('Simple Components (Ripple + Pulse)', 'simple', groupedByType.simple)}
       </div>
 
       <div class="section" style="margin-top: 24px;">
-        ${this._renderComponentGroup('Medium Complexity (Message Box + Visibility)', 'medium', groupedByType.medium)}
+        ${this._renderComponentGroup('Medium Complexity (Theme)', 'medium', groupedByType.medium)}
       </div>
 
       <div class="section" style="margin-top: 24px;">
-        ${this._renderComponentGroup('High Complexity (Alert Box + Multiple Features)', 'complex', groupedByType.complex)}
+        ${this._renderComponentGroup('High Complexity (Dismiss Chain)', 'complex', groupedByType.complex)}
       </div>
     `;
   }
@@ -435,48 +433,69 @@ export class StressTest extends LitElement {
     if (comp.type === 'simple') {
       return html`
         <div class="component-wrapper">
-          <message-base status=${comp.status}> ${messagePrefix} ${comp.message} </message-base>
-          <div class="component-meta">ID: ${comp.id} | Type: message-base</div>
-        </div>
-      `;
-    } else if (comp.type === 'medium') {
-      return html`
-        <div class="component-wrapper">
-          <message-box status=${comp.status} ?visible=${comp.visible !== false}>
-            ${messagePrefix} ${comp.message}
-          </message-box>
-          <div class="component-meta">ID: ${comp.id} | Type: message-box | Visible: ${comp.visible !== false ? 'yes' : 'no'}</div>
-        </div>
-      `;
-    } else {
-      // complex
-      return html`
-        <div class="component-wrapper">
-          <alert-box status=${comp.status} ?dismissible=${true}>
-            ${messagePrefix} ${comp.message}
-          </alert-box>
-          <div class="component-meta">
-            ID: ${comp.id} | Type: alert-box | Timer: ${comp.hasTimer ? 'yes' : 'no'}
-          </div>
+          ${comp.kind === 'button'
+            ? html`<simple-button>${messagePrefix} ${comp.message}</simple-button>`
+            : comp.kind === 'card'
+              ? html`
+                  <simple-card>
+                    <span slot="title">${comp.title}</span>
+                    ${messagePrefix} ${comp.message}
+                  </simple-card>
+                `
+              : html`<simple-badge>${comp.message}</simple-badge>`}
+          <div class="component-meta">ID: ${comp.id} | Type: ${comp.kind}</div>
         </div>
       `;
     }
+
+    if (comp.type === 'medium') {
+      return html`
+        <div class="component-wrapper">
+          ${comp.kind === 'themed-card'
+            ? html`
+                <themed-card>
+                  <span slot="title">${comp.title}</span>
+                  ${messagePrefix} ${comp.message}
+                </themed-card>
+              `
+            : comp.kind === 'themed-button'
+              ? html`<themed-button>${messagePrefix} ${comp.message}</themed-button>`
+              : html`<themed-panel>${messagePrefix} ${comp.message}</themed-panel>`}
+          <div class="component-meta">ID: ${comp.id} | Type: ${comp.kind}</div>
+        </div>
+      `;
+    }
+
+    return html`
+      <div class="component-wrapper">
+        ${comp.kind === 'basic-notification'
+          ? html`<basic-notification>${messagePrefix} ${comp.message}</basic-notification>`
+          : comp.kind === 'auto-notification'
+            ? html`<auto-notification>${messagePrefix} ${comp.message}</auto-notification>`
+            : html`<swipe-notification>${messagePrefix} ${comp.message}</swipe-notification>`}
+        <div class="component-meta">ID: ${comp.id} | Type: ${comp.kind}</div>
+      </div>
+    `;
   }
 
   private _handleGenerateComponents(): void {
     performanceMonitor.mark('component-generation-start');
 
     const components: typeof this._components = [];
-    const statuses: StatusType[] = ['info', 'success', 'warning', 'error'];
+    const simpleKinds = ['button', 'card', 'badge'];
+    const mediumKinds = ['themed-card', 'themed-button', 'themed-panel'];
+    const complexKinds = ['basic-notification', 'auto-notification', 'swipe-notification'];
 
     // Generate 20 simple components
     performanceMonitor.mark('generate-simple-start');
     for (let i = 0; i < 20; i++) {
+      const kind = simpleKinds[i % simpleKinds.length];
       components.push({
         id: i,
         type: 'simple',
-        status: statuses[i % statuses.length],
-        message: `Simple message ${i + 1}: Basic notification component`
+        kind,
+        title: kind === 'card' ? `Simple Card ${i + 1}` : undefined,
+        message: `Simple component ${i + 1}`
       });
     }
     const simpleTime = performanceMonitor.measure('generate-simple', {
@@ -485,15 +504,16 @@ export class StressTest extends LitElement {
       context: { count: 20 }
     });
 
-    // Generate 15 medium complexity components
+    // Generate 18 medium complexity components
     performanceMonitor.mark('generate-medium-start');
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 18; i++) {
+      const kind = mediumKinds[i % mediumKinds.length];
       components.push({
         id: 20 + i,
         type: 'medium',
-        status: statuses[i % statuses.length],
-        message: `Medium message ${i + 1}: Component with visibility feature`,
-        visible: i % 3 !== 0 // Some hidden
+        kind,
+        title: kind === 'themed-card' ? `Themed Card ${i + 1}` : undefined,
+        message: `Themed component ${i + 1}`
       });
     }
     const mediumTime = performanceMonitor.measure('generate-medium', {
@@ -502,16 +522,15 @@ export class StressTest extends LitElement {
       context: { count: 15 }
     });
 
-    // Generate 15 complex components
+    // Generate 18 complex components
     performanceMonitor.mark('generate-complex-start');
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 18; i++) {
+      const kind = complexKinds[i % complexKinds.length];
       components.push({
-        id: 35 + i,
+        id: 38 + i,
         type: 'complex',
-        status: statuses[i % statuses.length],
-        message: `Complex message ${i + 1}: Dismiss and visibility features`,
-        visible: true,
-        hasTimer: i % 2 === 0 // Half have timers
+        kind,
+        message: `Dismiss demo ${i + 1}`
       });
     }
     const complexTime = performanceMonitor.measure('generate-complex', {
@@ -566,10 +585,10 @@ export class StressTest extends LitElement {
         `   - Simple (20): ${simpleTime.toFixed(2)}ms (${(simpleTime / 20).toFixed(3)}ms each)`
       );
       console.log(
-        `   - Medium (15): ${mediumTime.toFixed(2)}ms (${(mediumTime / 15).toFixed(3)}ms each)`
+        `   - Medium (18): ${mediumTime.toFixed(2)}ms (${(mediumTime / 18).toFixed(3)}ms each)`
       );
       console.log(
-        `   - Complex (15): ${complexTime.toFixed(2)}ms (${(complexTime / 15).toFixed(3)}ms each)`
+        `   - Complex (18): ${complexTime.toFixed(2)}ms (${(complexTime / 18).toFixed(3)}ms each)`
       );
     });
   }

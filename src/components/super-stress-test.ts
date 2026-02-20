@@ -2,18 +2,13 @@ import { html, css, TemplateResult, CSSResultGroup, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';
 import { performanceMonitor } from '../root/performance-monitor.js';
 
-// Import all notification components
-import './message-base.js';
-import './message-box.js';
-import './alert-box.js';
-import './toast-notification.js';
-
-import type { StatusType } from '../features/status-feature.js';
+// Import showcase notification component
+import './swipe-notification.js';
 
 /**
  * Super Stress Test Component
  * 
- * Silently generates 500 of the most complex components (AlertBox) to test performance.
+ * Silently generates 500 of the most complex showcase components to test performance.
  * Designed for quick standup demos - no console spam, only final timing.
  * 
  * @element super-stress-test
@@ -34,7 +29,6 @@ export class SuperStressTest extends LitElement {
   @state()
   private _components: Array<{
     id: number;
-    status: StatusType;
     message: string;
   }> = [];
 
@@ -224,7 +218,7 @@ export class SuperStressTest extends LitElement {
         ${!this._isComplete
           ? html`
               <h1>⚡ Super Stress Test</h1>
-              <p class="subtitle">Silently rendering 500 complex components...</p>
+              <p class="subtitle">Silently rendering 500 complex showcase components...</p>
 
               ${this._isRunning
                 ? html`
@@ -292,9 +286,7 @@ export class SuperStressTest extends LitElement {
   private _renderHiddenComponent(comp: (typeof this._components)[0]): TemplateResult {
     return html`
       <div class="component-item">
-        <alert-box status=${comp.status} ?dismissible=${true}>
-          ${comp.message}
-        </alert-box>
+        <swipe-notification>${comp.message}</swipe-notification>
       </div>
     `;
   }
@@ -308,7 +300,6 @@ export class SuperStressTest extends LitElement {
 
     // Use requestAnimationFrame to break up work and allow renders between batches
     const startTime = performance.now();
-    const statuses: StatusType[] = ['info', 'success', 'warning', 'error'];
     const componentsToGenerate = 500;
     const batchSize = 50; // Process in batches of 50
 
@@ -319,7 +310,6 @@ export class SuperStressTest extends LitElement {
       for (let i = start; i < end; i++) {
         this._components.push({
           id: i,
-          status: statuses[i % statuses.length],
           message: `Component ${i + 1}`
         });
       }
