@@ -387,7 +387,8 @@ export class DocsPage extends LitElement {
   }
 
   private handleHashNavigation() {
-    const hash = window.location.hash.slice(1);
+    const hash = window.location.hash.split('#')[2]; // Get the part after the first #
+    console.warn(hash);
     if (hash) {
       // Look for the element in this component's shadow root
       const element = this.shadowRoot?.getElementById(hash);
@@ -411,25 +412,25 @@ export class DocsPage extends LitElement {
       </div>
 
       <div class="toc">
-        <a href="#author-feature" style="text-decoration: none; color: inherit;">
+        <a href="#docs#author-feature" style="text-decoration: none; color: inherit;">
           <div class="toc-card">
             <h3>Create a Feature</h3>
             <p>Define properties, styles, and behavior in a LitFeature subclass.</p>
           </div>
         </a>
-        <a href="#attach-feature" style="text-decoration: none; color: inherit;">
+        <a href="#docs#attach-feature" style="text-decoration: none; color: inherit;">
           <div class="toc-card">
             <h3>Attach to a Component</h3>
             <p>Wire a feature into a host using @provide or static provide.</p>
           </div>
         </a>
-        <a href="#configure-compose" style="text-decoration: none; color: inherit;">
+        <a href="#docs#configure-compose" style="text-decoration: none; color: inherit;">
           <div class="toc-card">
             <h3>Configure & Compose</h3>
             <p>Override config and compose multiple features together.</p>
           </div>
         </a>
-        <a href="#extend-features" style="text-decoration: none; color: inherit;">
+        <a href="#docs#extend-features" style="text-decoration: none; color: inherit;">
           <div class="toc-card">
             <h3>Extend Features</h3>
             <p>Subclass existing features to add custom behavior and properties.</p>

@@ -11,8 +11,7 @@ import './super-stress-test.js';
  * AppRouter Component
  * 
  * Main application routing layer that handles:
- * - Navigation between pages
- * - Path-based routing using History API
+ * - Hash-based routing (#route/subroute#pagelink pattern)
  * - Dynamic page loading
  * - Shared navigation bar
  */
@@ -20,8 +19,6 @@ import './super-stress-test.js';
 export class AppRouter extends LitElement {
   @state()
   private currentPage: 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test' = 'home';
-
-  private baseUrl = (import.meta as any).env.BASE_URL;
 
   static override styles = css`
     :host {
@@ -60,7 +57,7 @@ export class AppRouter extends LitElement {
   constructor() {
     super();
     this.handleRouteChange();
-    window.addEventListener('popstate', () => this.handleRouteChange());
+    window.addEventListener('hashchange', () => this.handleRouteChange());
   }
 
   override connectedCallback() {
@@ -70,13 +67,17 @@ export class AppRouter extends LitElement {
   }
 
   private handleRouteChange() {
-    // Remove base URL from pathname to get the route
-    let path = window.location.pathname;
-    if (path.startsWith(this.baseUrl)) {
-      path = path.slice(this.baseUrl.length);
+    // Parse hash pattern: #route/subroute#pagelink
+    let hash = window.location.hash.slice(1); // Remove leading #
+    let route = hash;
+    
+    // Handle subroute/pagelink pattern if present
+    if (hash.includes('#')) {
+      route = hash.split('#')[0];
     }
-    // Remove leading slash and default to 'home'
-    path = path.replace(/^\//, '') || 'home';
+    
+    // Extract main route (before any /)
+    const mainRoute = route.split('/')[0] || 'home';
     
     const validPages: Record<string, 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test'> = {
       '': 'home',
@@ -87,7 +88,7 @@ export class AppRouter extends LitElement {
       'super-stress-test': 'super-stress-test',
     };
     
-    const newPage = validPages[path] || 'home';
+    const newPage = validPages[mainRoute] || 'home';
     const isPageChanging = this.currentPage !== newPage;
     this.currentPage = newPage;
     
@@ -101,13 +102,8 @@ export class AppRouter extends LitElement {
     const event = e as CustomEvent<{ page: string }>;
     const page = event.detail.page as 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test';
     const route = page === 'home' ? '' : page;
-    const fullPath = `${this.baseUrl}${route}`;
     
-    if (this.currentPage !== page) {
-      this.currentPage = page;
-      window.history.pushState({}, '', fullPath);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.location.hash = route;
   }
 
   override render() {
