@@ -665,9 +665,9 @@ export class ShowcaseDemo extends LitCore {
           <a class="cta-button" href="https://github.com/StephenRiosDev/LitFeature" target="_blank">
             View on GitHub
           </a>
-          <a class="cta-button secondary" href="docs">
+          <button class="cta-button secondary" @click="${this._goToDocs}">
             Read the Docs
-          </a>
+          </button>
         </div>
       </div>
     `;
@@ -704,16 +704,18 @@ export class ShowcaseDemo extends LitCore {
       this._showBasicNotification = true;
     }, 500);
   }
-}
 
-// Register all components
-customElements.define('simple-button', SimpleButton);
-customElements.define('simple-card', SimpleCard);
-customElements.define('simple-badge', SimpleBadge);
-customElements.define('themed-card', ThemedCard);
-customElements.define('themed-button', ThemedButton);
-customElements.define('themed-panel', ThemedPanel);
-customElements.define('basic-notification', BasicNotification);
+  private _goToDocs(): void {
+    this.dispatchEvent(
+      new CustomEvent('navigate', {
+        detail: { page: 'docs' },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+};
+
 customElements.define('auto-notification', AutoNotification);
 customElements.define('swipe-notification', SwipeNotification);
 customElements.define('showcase-demo', ShowcaseDemo);

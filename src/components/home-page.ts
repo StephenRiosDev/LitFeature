@@ -239,9 +239,9 @@ export class HomePage extends LitElement {
           component libraries and design systems with Lit.
         </p>
         <div class="byline">A proposal by Stephen Rios</div>
-        <a class="cta-button" href="demo">
+        <button class="cta-button" @click="${this._goToDemo}">
           → View the Demo
-        </a>
+        </button>
       </div>
 
       <div class="content">

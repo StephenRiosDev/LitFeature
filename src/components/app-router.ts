@@ -63,6 +63,12 @@ export class AppRouter extends LitElement {
     window.addEventListener('popstate', () => this.handleRouteChange());
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    // Listen for navigate events from child components
+    this.addEventListener('navigate', (e: Event) => this.handleNavigate(e));
+  }
+
   private handleRouteChange() {
     // Remove base URL from pathname to get the route
     let path = window.location.pathname;
@@ -87,7 +93,7 @@ export class AppRouter extends LitElement {
     
     // If navigating to a new page, scroll to top
     if (isPageChanging) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }
 
