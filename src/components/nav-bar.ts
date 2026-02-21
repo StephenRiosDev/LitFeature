@@ -10,7 +10,7 @@ import { customElement, property } from 'lit/decorators.js';
 @customElement('nav-bar')
 export class NavBar extends LitElement {
   @property()
-  currentPage: 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test' = 'home';
+  currentPage: 'home' | 'docs' | 'demo' = 'home';
 
   private baseUrl = (import.meta as any).env.BASE_URL;
 
@@ -195,7 +195,7 @@ export class NavBar extends LitElement {
     }
   `;
 
-  private handleNavigation(page: 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test') {
+  private handleNavigation(page: 'home' | 'docs' | 'demo') {
     this.currentPage = page;
     this.dispatchEvent(
       new CustomEvent('navigate', {
@@ -247,30 +247,6 @@ export class NavBar extends LitElement {
               class=${this.currentPage === 'docs' ? 'active' : ''}
             >
               Docs
-            </a>
-          </li>
-          <li>
-            <a
-              href="${this.baseUrl}stress-test"
-              @click=${(e: Event) => {
-                e.preventDefault();
-                this.handleNavigation('stress-test');
-              }}
-              class=${this.currentPage === 'stress-test' ? 'active' : ''}
-            >
-              Stress Test
-            </a>
-          </li>
-          <li>
-            <a
-              href="${this.baseUrl}super-stress-test"
-              @click=${(e: Event) => {
-                e.preventDefault();
-                this.handleNavigation('super-stress-test');
-              }}
-              class=${this.currentPage === 'super-stress-test' ? 'active' : ''}
-            >
-              Super Stress Test
             </a>
           </li>
         </ul>
