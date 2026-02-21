@@ -1,6 +1,6 @@
-import { LitFeature, FeatureProperties, FeatureConfig } from '../root/lit-feature.js';
-import type { LitCore } from '../root/lit-core.js';
-import { property } from '../root/decorators/feature-property.js';
+import { LitFeature } from 'lit-feature';
+import type { LitCore } from 'lit-feature';
+import { property } from 'lit-feature/decorators';
 
 /**
  * Available theme variants
@@ -10,7 +10,7 @@ export type ThemeVariant = 'light' | 'dark' | 'auto';
 /**
  * Configuration for ThemeFeature
  */
-export interface ThemeConfig extends FeatureConfig {
+export interface ThemeConfig {
   /** Default theme variant */
   defaultTheme?: ThemeVariant;
   /** Whether to respect system theme preference */
@@ -51,7 +51,7 @@ export class ThemeFeature extends LitFeature<ThemeConfig> {
   /**
    * Traditional static properties for comparison
    */
-  static properties: FeatureProperties = {
+  static properties = {
     colors: {
       type: Object,
       attribute: false

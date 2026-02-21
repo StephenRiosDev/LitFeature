@@ -1,6 +1,6 @@
 import { html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { LitCore } from '../root/lit-core.js';
-import { provide } from '../root/decorators/index.js';
+import { LitCore } from 'lit-feature';
+import { provide } from 'lit-feature/decorators';
 import { AutoDismissFeature } from '../features/auto-dismiss-feature.js';
 
 /**

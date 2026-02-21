@@ -1,12 +1,12 @@
-import { css } from 'lit';
-import { LitFeature, FeatureProperties, FeatureConfig } from '../root/lit-feature.js';
-import type { LitCore } from '../root/lit-core.js';
-import { property } from '../root/decorators/feature-property.js';
+import { css, PropertyDeclarations } from 'lit';
+import { LitFeature } from 'lit-feature';
+import type { LitCore } from 'lit-feature';
+import { property } from 'lit-feature/decorators';
 
 /**
  * Configuration for BaseDismissFeature
  */
-export interface BaseDismissConfig extends FeatureConfig {
+export interface BaseDismissConfig {
   /** Whether the element can be dismissed */
   dismissible?: boolean;
   /** Accessibility label for dismiss button */
@@ -26,7 +26,7 @@ export class BaseDismissFeature extends LitFeature<BaseDismissConfig> {
   @property({ type: Boolean, reflect: true })
   dismissed = false;
 
-  static properties: FeatureProperties = {
+  static properties: PropertyDeclarations = {
     dismissLabel: {
       type: String,
       attribute: 'dismiss-label'
@@ -35,7 +35,7 @@ export class BaseDismissFeature extends LitFeature<BaseDismissConfig> {
 
   declare dismissLabel: string;
 
-  static styles = css`
+  static styles: any = css`
     :host([dismissed]) {
       animation: dismissFadeOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
     }

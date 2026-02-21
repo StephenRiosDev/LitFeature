@@ -1,7 +1,8 @@
 import { html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { LitCore } from '../root/lit-core.js';
-import { provide } from '../root/decorators/index.js';
+import { LitCore } from 'lit-feature';
+import { provide } from 'lit-feature/decorators';
 import { PulseFeature } from '../features/pulse-feature.js';
+
 
 /**
  * SimpleBadge - Tier 1 Demo Component
@@ -11,7 +12,12 @@ import { PulseFeature } from '../features/pulse-feature.js';
  * 
  * @element simple-badge
  */
-@provide('Pulse', { class: PulseFeature, config: { initiallyPulsing: true } })
+@provide('Pulse', {
+  class: PulseFeature,
+  config: {
+    initiallyPulsing: true
+  }
+})
 export class SimpleBadge extends LitCore {
   declare Pulse: PulseFeature;
   declare pulsing: boolean;

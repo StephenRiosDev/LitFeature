@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@types/lodash.merge": "^4.6.9",
+    "lit-feature": "1.0.2",
     "typescript": "^5.7.0",
     "vite": "^7.0.3"
   }

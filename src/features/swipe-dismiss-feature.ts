@@ -1,7 +1,7 @@
 import { css } from 'lit';
 import { AutoDismissFeature, AutoDismissConfig } from './auto-dismiss-feature.js';
-import type { LitCore } from '../root/lit-core.js';
-import { property } from '../root/decorators/feature-property.js';
+import type { LitCore } from 'lit-feature';
+import { property } from 'lit-feature/decorators';
 
 /**
  * Configuration for SwipeDismissFeature

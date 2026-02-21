@@ -1,6 +1,6 @@
 import { html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { state } from 'lit/decorators.js';
-import { LitCore } from '../root/lit-core.js';
+import { LitCore } from 'lit-feature';
 
 // Register all demo components
 import { SimpleButton } from './simple-button.js';

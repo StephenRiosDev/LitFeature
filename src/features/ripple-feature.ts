@@ -1,12 +1,11 @@
 import { css } from 'lit';
-import { LitFeature, FeatureConfig } from '../root/lit-feature.js';
-import type { LitCore } from '../root/lit-core.js';
-import { property } from '../root/decorators/feature-property.js';
+import { LitFeature, LitCore } from 'lit-feature';
+import { property } from 'lit-feature/decorators';
 
 /**
  * Configuration for RippleFeature
  */
-export interface RippleConfig extends FeatureConfig {
+export interface RippleConfig {
   /** Color of the ripple effect */
   rippleColor?: string;
   /** Duration of the ripple animation in ms */

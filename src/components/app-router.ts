@@ -4,8 +4,6 @@ import './nav-bar.js';
 import './home-page.js';
 import './docs-page.js';
 import './demo-page.js';
-import './stress-test.js';
-import './super-stress-test.js';
 
 /**
  * AppRouter Component
@@ -106,13 +104,11 @@ export class AppRouter extends LitElement {
     // Extract main route (before any /)
     const mainRoute = route.split('/')[0] || 'home';
     
-    const validPages: Record<string, 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test'> = {
+    const validPages: Record<string, 'home' | 'docs' | 'demo' > = {
       '': 'home',
       home: 'home',
       docs: 'docs',
-      demo: 'demo',
-      'stress-test': 'stress-test',
-      'super-stress-test': 'super-stress-test',
+      demo: 'demo'
     };
     
     const newPage = validPages[mainRoute] || 'home';
@@ -127,7 +123,7 @@ export class AppRouter extends LitElement {
 
   private handleNavigate(e: Event) {
     const event = e as CustomEvent<{ page: string }>;
-    const page = event.detail.page as 'home' | 'docs' | 'demo' | 'stress-test' | 'super-stress-test';
+    const page = event.detail.page as 'home' | 'docs' | 'demo';
     const route = page === 'home' ? '' : page;
     
     window.location.hash = route;
@@ -153,10 +149,6 @@ export class AppRouter extends LitElement {
         return html`<docs-page></docs-page>`;
       case 'demo':
         return html`<demo-page></demo-page>`;
-      case 'stress-test':
-        return html`<stress-test></stress-test>`;
-      case 'super-stress-test':
-        return html`<super-stress-test></super-stress-test>`;
       default:
         return html`<home-page></home-page>`;
     }

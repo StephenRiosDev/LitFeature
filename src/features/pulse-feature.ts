@@ -1,12 +1,12 @@
 import { css } from 'lit';
-import { LitFeature, FeatureConfig } from '../root/lit-feature.js';
-import type { LitCore } from '../root/lit-core.js';
-import { property } from '../root/decorators/feature-property.js';
+import { LitFeature } from 'lit-feature';
+import type { LitCore } from 'lit-feature';
+import { property } from 'lit-feature/decorators';
 
 /**
  * Configuration for PulseFeature
  */
-export interface PulseConfig extends FeatureConfig {
+export interface PulseConfig {
   /** Initial pulsing state */
   initiallyPulsing?: boolean;
   /** Pulse animation duration in ms */
