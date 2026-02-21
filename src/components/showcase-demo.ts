@@ -716,6 +716,14 @@ export class ShowcaseDemo extends LitCore {
   }
 };
 
+// Register all components
+customElements.define('simple-button', SimpleButton);
+customElements.define('simple-card', SimpleCard);
+customElements.define('simple-badge', SimpleBadge);
+customElements.define('themed-card', ThemedCard);
+customElements.define('themed-button', ThemedButton);
+customElements.define('themed-panel', ThemedPanel);
+customElements.define('basic-notification', BasicNotification);
 customElements.define('auto-notification', AutoNotification);
 customElements.define('swipe-notification', SwipeNotification);
 customElements.define('showcase-demo', ShowcaseDemo);
