@@ -340,7 +340,7 @@ export class ShowcaseDemo extends LitCore {
     /* Extra Small Devices (375px - 479px) */
     @media (max-width: 479px) {
       :host {
-        padding: 0 16px 24px 16px;
+        padding: 0 0 24px 0;
       }
 
       .container {
@@ -499,7 +499,7 @@ export class ShowcaseDemo extends LitCore {
     /* Small Devices (480px - 639px) */
     @media (min-width: 480px) and (max-width: 639px) {
       :host {
-        padding: 0 20px 32px 20px;
+        padding: 0 0 32px 0;
       }
 
       .header h1 {
@@ -560,7 +560,7 @@ export class ShowcaseDemo extends LitCore {
     /* Medium Devices (640px - 767px) */
     @media (min-width: 640px) and (max-width: 767px) {
       :host {
-        padding: 0 24px 32px 24px;
+        padding: 0 0 32px 0;
       }
 
       .header h1 {
@@ -606,7 +606,7 @@ export class ShowcaseDemo extends LitCore {
     /* Tablet & Small Laptop (768px - 1023px) */
     @media (min-width: 768px) and (max-width: 1023px) {
       :host {
-        padding: 0 24px 40px 24px;
+        padding: 0 0 40px 0;
       }
 
       .header h1 {

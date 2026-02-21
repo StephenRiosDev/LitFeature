@@ -62,7 +62,7 @@ export class DemoPage extends LitElement {
       }
 
       .hero {
-        padding: 0 16px;
+        padding: 0;
       }
     }
   `;
