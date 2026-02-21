@@ -47,10 +47,37 @@ export class AppRouter extends LitElement {
       }
     }
 
-    @media (max-width: 768px) {
+    /* Extra Small Devices (375px - 479px) */
+    @media (max-width: 479px) {
       .page-container {
-        padding: 24px 16px;
+        padding: 16px 12px;
       }
+    }
+
+    /* Small Devices (480px - 639px) */
+    @media (min-width: 480px) and (max-width: 639px) {
+      .page-container {
+        padding: 20px 16px;
+      }
+    }
+
+    /* Medium Devices (640px - 767px) */
+    @media (min-width: 640px) and (max-width: 767px) {
+      .page-container {
+        padding: 28px 20px;
+      }
+    }
+
+    /* Tablet & Small Laptop (768px - 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .page-container {
+        padding: 36px 24px;
+      }
+    }
+
+    /* Large Devices (1024px+) */
+    @media (min-width: 1024px) {
+      /* Default padding already set */
     }
   `;
 

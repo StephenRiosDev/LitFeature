@@ -279,9 +279,10 @@ export class DocsPage extends LitElement {
     }
 
     .note::before {
-      content: '💡 ';
-      font-size: 16px;
+      content: '✦ ';
+      font-size: 14px;
       margin-right: 6px;
+      font-weight: bold;
     }
 
     .grid-two {
@@ -319,7 +320,7 @@ export class DocsPage extends LitElement {
     }
 
     .signature::before {
-      content: '📝 API';
+      content: '✎ API';
       display: block;
       font-size: 11px;
       font-weight: 700;
@@ -353,9 +354,178 @@ export class DocsPage extends LitElement {
       font-size: 13px;
     }
 
-    @media (max-width: 720px) {
+    /* Extra Small Devices (375px - 479px) */
+    @media (max-width: 479px) {
       h1 {
-        font-size: 40px;
+        font-size: 28px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      h3 {
+        font-size: 16px;
+      }
+
+      h4 {
+        font-size: 14px;
+      }
+
+      .lead {
+        font-size: 14px;
+      }
+
+      .pill-row {
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .pill {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+
+      .toc {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin: 24px 0 32px;
+      }
+
+      .toc-card {
+        padding: 16px;
+      }
+
+      .toc-card h3 {
+        font-size: 14px;
+      }
+
+      .section-header {
+        padding: 16px;
+        margin-bottom: 20px;
+      }
+
+      .section-number {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 14px;
+      }
+
+      .subsection {
+        padding: 16px;
+        margin-bottom: 24px;
+      }
+
+      h3 {
+        gap: 6px;
+      }
+
+      h3::before {
+        height: 16px;
+      }
+
+      .code-block {
+        margin: 16px 0 20px;
+      }
+
+      pre {
+        padding: 12px;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .grid-two {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .signature {
+        padding: 12px 16px;
+        font-size: 11px;
+      }
+
+      .note {
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+
+      ul {
+        font-size: 14px;
+        padding-left: 16px;
+      }
+
+      .footer {
+        font-size: 11px;
+        margin-top: 40px;
+      }
+    }
+
+    /* Small Devices (480px - 639px) */
+    @media (min-width: 480px) and (max-width: 639px) {
+      h1 {
+        font-size: 32px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      .lead {
+        font-size: 15px;
+      }
+
+      .toc {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin: 28px 0 40px;
+      }
+
+      .subsection {
+        padding: 18px;
+        margin-bottom: 28px;
+      }
+
+      .section-header {
+        padding: 18px;
+      }
+
+      .code-block {
+        margin: 18px 0 22px;
+      }
+
+      pre {
+        padding: 14px;
+        font-size: 12px;
+      }
+
+      .grid-two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Medium Devices (640px - 767px) */
+    @media (min-width: 640px) and (max-width: 767px) {
+      h1 {
+        font-size: 36px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      .lead {
+        font-size: 15px;
+      }
+
+      .toc {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
       }
 
       .subsection {
@@ -365,6 +535,52 @@ export class DocsPage extends LitElement {
       .section-header {
         padding: 20px;
       }
+
+      .grid-two {
+        grid-template-columns: 1fr;
+      }
+
+      .code-block {
+        margin: 20px 0 24px;
+      }
+    }
+
+    /* Tablet & Small Laptop (768px - 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      h1 {
+        font-size: 40px;
+      }
+
+      h2 {
+        font-size: 26px;
+      }
+
+      .lead {
+        font-size: 16px;
+      }
+
+      .toc {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+      }
+
+      .subsection {
+        padding: 24px;
+      }
+
+      .section-header {
+        padding: 24px;
+      }
+
+      .grid-two {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 18px;
+      }
+    }
+
+    /* Large Devices (1024px+) */
+    @media (min-width: 1024px) {
+      /* Default styles already set */
     }
   `;
 

@@ -260,21 +260,103 @@ pre code {
 /* Responsive Design                        */
 /* ======================================== */
 
-@media (max-width: 768px) {
+/* Mobile First: Extra Small Devices (375px - 479px) */
+@media (max-width: 479px) {
+  :root {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 28px;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin: 24px 0 12px 0;
+  }
+
+  h3 {
+    font-size: 18px;
+    margin: 16px 0 8px 0;
+  }
+
+  h4 {
+    font-size: 16px;
+    margin: 12px 0 6px 0;
+  }
+
+  button {
+    padding: 10px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+
+  .section {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0 0 12px 0;
+  }
+
+  code {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+
+  pre {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  input, textarea, select {
+    padding: 8px 10px;
+    font-size: 16px;
+  }
+}
+
+/* Small Devices (480px - 639px) */
+@media (min-width: 480px) and (max-width: 639px) {
   :root {
     font-size: 14px;
   }
 
   h1 {
     font-size: 32px;
+    margin: 0 0 14px 0;
   }
 
   h2 {
     font-size: 24px;
+    margin: 28px 0 12px 0;
   }
 
   h3 {
     font-size: 20px;
+    margin: 20px 0 10px 0;
+  }
+
+  button {
+    padding: 10px 18px;
+    font-size: 15px;
+    min-height: 44px;
   }
 
   .container {
@@ -282,12 +364,99 @@ pre code {
   }
 
   .section {
-    padding: 16px;
+    padding: 20px;
+    margin: 20px 0;
   }
 
   .grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
+
+  .card {
+    padding: 18px;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0 0 12px 0;
+  }
+}
+
+/* Medium Devices (640px - 767px) */
+@media (min-width: 640px) and (max-width: 767px) {
+  :root {
+    font-size: 15px;
+  }
+
+  h1 {
+    font-size: 36px;
+    margin: 0 0 16px 0;
+  }
+
+  h2 {
+    font-size: 26px;
+    margin: 28px 0 14px 0;
+  }
+
+  h3 {
+    font-size: 22px;
+    margin: 20px 0 10px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .section {
+    padding: 24px;
+    margin: 24px 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}
+
+/* Tablet & Small Laptop (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    font-size: 15px;
+  }
+
+  h1 {
+    font-size: 40px;
+    margin: 0 0 16px 0;
+  }
+
+  h2 {
+    font-size: 28px;
+    margin: 30px 0 16px 0;
+  }
+
+  .container {
+    padding: 0 24px;
+  }
+
+  .section {
+    padding: 28px;
+    margin: 28px 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 22px;
+  }
+}
+
+/* Large Devices (1024px+) - Default */
+@media (min-width: 1024px) {
+  /* Default sizes already set above */
 }
 
 /* ======================================== */

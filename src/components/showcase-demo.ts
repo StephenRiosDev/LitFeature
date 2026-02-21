@@ -336,6 +336,319 @@ export class ShowcaseDemo extends LitCore {
       background: transparent;
       color: white;
     }
+
+    /* Extra Small Devices (375px - 479px) */
+    @media (max-width: 479px) {
+      :host {
+        padding: 0 16px 24px 16px;
+      }
+
+      .container {
+        width: 100%;
+      }
+
+      .header {
+        margin-bottom: 32px;
+      }
+
+      .header h1 {
+        font-size: 28px;
+        margin: 0 0 12px 0;
+        letter-spacing: -0.5px;
+      }
+
+      .header p {
+        font-size: 14px;
+      }
+
+      .tier-section {
+        padding: 20px;
+        margin-bottom: 24px;
+        border-radius: 16px;
+      }
+
+      .tier-header {
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+      }
+
+      .tier-label {
+        font-size: 10px;
+        padding: 4px 8px;
+        margin-bottom: 8px;
+      }
+
+      .tier-title {
+        font-size: 22px;
+        margin: 0 0 8px 0;
+      }
+
+      .tier-description {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .demo-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin: 20px 0;
+      }
+
+      .demo-item {
+        padding: 16px;
+        border-radius: 10px;
+      }
+
+      .demo-label {
+        font-size: 11px;
+        margin-bottom: 10px;
+      }
+
+      .code-section {
+        padding: 16px;
+        margin: 16px 0;
+        border-radius: 10px;
+      }
+
+      .code-header {
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .code-title {
+        font-size: 13px;
+      }
+
+      pre {
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .benefits-list {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin: 20px 0;
+      }
+
+      .benefit-item {
+        padding: 16px;
+        gap: 10px;
+      }
+
+      .benefit-icon {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 14px;
+      }
+
+      .benefit-title {
+        font-size: 13px;
+      }
+
+      .benefit-description {
+        font-size: 12px;
+      }
+
+      .inheritance-diagram {
+        padding: 20px;
+        margin: 16px 0;
+      }
+
+      .inheritance-level {
+        padding: 10px 16px;
+        font-size: 13px;
+        margin: 6px;
+      }
+
+      .inheritance-level::after {
+        right: -22px;
+        font-size: 16px;
+      }
+
+      .cta-section {
+        padding: 24px;
+        margin-top: 24px;
+        border-radius: 16px;
+      }
+
+      .cta-title {
+        font-size: 20px;
+        margin: 0 0 12px 0;
+      }
+
+      .cta-description {
+        font-size: 14px;
+        margin: 0 0 16px 0;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .cta-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+    }
+
+    /* Small Devices (480px - 639px) */
+    @media (min-width: 480px) and (max-width: 639px) {
+      :host {
+        padding: 0 20px 32px 20px;
+      }
+
+      .header h1 {
+        font-size: 32px;
+        margin: 0 0 12px 0;
+      }
+
+      .header p {
+        font-size: 15px;
+      }
+
+      .tier-section {
+        padding: 24px;
+        margin-bottom: 28px;
+      }
+
+      .tier-title {
+        font-size: 26px;
+      }
+
+      .tier-description {
+        font-size: 15px;
+      }
+
+      .demo-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .code-section {
+        padding: 18px;
+        margin: 18px 0;
+      }
+
+      pre {
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .benefits-list {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .benefit-item {
+        padding: 16px;
+      }
+
+      .cta-section {
+        padding: 28px;
+      }
+
+      .cta-button {
+        width: 100%;
+      }
+    }
+
+    /* Medium Devices (640px - 767px) */
+    @media (min-width: 640px) and (max-width: 767px) {
+      :host {
+        padding: 0 24px 32px 24px;
+      }
+
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .header p {
+        font-size: 16px;
+      }
+
+      .tier-section {
+        padding: 32px;
+        margin-bottom: 32px;
+      }
+
+      .tier-title {
+        font-size: 28px;
+      }
+
+      .demo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+      }
+
+      .benefits-list {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+
+      .code-section {
+        padding: 20px;
+      }
+
+      .cta-buttons {
+        flex-wrap: wrap;
+      }
+
+      .cta-buttons .cta-button {
+        width: auto;
+      }
+    }
+
+    /* Tablet & Small Laptop (768px - 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      :host {
+        padding: 0 24px 40px 24px;
+      }
+
+      .header h1 {
+        font-size: 40px;
+      }
+
+      .header p {
+        font-size: 17px;
+      }
+
+      .tier-section {
+        padding: 36px;
+        margin-bottom: 36px;
+      }
+
+      .tier-title {
+        font-size: 30px;
+      }
+
+      .demo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+      }
+
+      .benefits-list {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+      }
+
+      .inheritance-diagram {
+        padding: 28px;
+      }
+
+      .cta-button {
+        padding: 12px 28px;
+      }
+    }
+
+    /* Large Devices (1024px+) */
+    @media (min-width: 1024px) {
+      /* Default styles already set */
+    }
   `;
 
   override render(): TemplateResult {

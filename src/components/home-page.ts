@@ -209,13 +209,109 @@ export class HomePage extends LitElement {
       text-align: center;
     }
 
-    @media (max-width: 768px) {
+    /* Extra Small Devices (375px - 479px) */
+    @media (max-width: 479px) {
+      h1 {
+        font-size: 28px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin: 20px 0 12px 0;
+      }
+
+      .lead {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .byline {
+        font-size: 12px;
+      }
+
+      section.section {
+        padding: 16px;
+        margin-bottom: 24px;
+      }
+
+      .content > .two-column {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .content > .single-column {
+        margin: 0 0 32px;
+      }
+
+      .cta-button {
+        padding: 10px 24px;
+        font-size: 13px;
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .section ul {
+        margin: 0;
+      }
+
+      .section li {
+        padding: 12px 0;
+        font-size: 13px;
+      }
+
+      .footer {
+        font-size: 12px;
+        margin-top: 40px;
+      }
+    }
+
+    /* Small Devices (480px - 639px) */
+    @media (min-width: 480px) and (max-width: 639px) {
+      h1 {
+        font-size: 32px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .lead {
+        font-size: 15px;
+      }
+
+      section.section {
+        padding: 20px;
+      }
+
+      .content > .two-column {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .cta-button {
+        padding: 11px 28px;
+        font-size: 14px;
+      }
+
+      .section li {
+        font-size: 14px;
+      }
+    }
+
+    /* Medium Devices (640px - 767px) */
+    @media (min-width: 640px) and (max-width: 767px) {
       h1 {
         font-size: 36px;
       }
 
       h2 {
         font-size: 22px;
+      }
+
+      .lead {
+        font-size: 16px;
       }
 
       section.section {
@@ -226,6 +322,49 @@ export class HomePage extends LitElement {
         grid-template-columns: 1fr;
         gap: 16px;
       }
+
+      .content > .single-column {
+        max-width: 100%;
+      }
+
+      .cta-button {
+        padding: 12px 30px;
+        font-size: 14px;
+        max-width: 260px;
+      }
+    }
+
+    /* Tablet & Small Laptop (768px - 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      h1 {
+        font-size: 44px;
+      }
+
+      h2 {
+        font-size: 26px;
+      }
+
+      .lead {
+        font-size: 16px;
+        max-width: 700px;
+      }
+
+      section.section {
+        padding: 28px;
+      }
+
+      .content > .two-column {
+        gap: 18px;
+      }
+
+      .cta-button {
+        max-width: 260px;
+      }
+    }
+
+    /* Large Devices (1024px+) */
+    @media (min-width: 1024px) {
+      /* Default styles already set */
     }
   `;
 
