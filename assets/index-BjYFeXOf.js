@@ -323,7 +323,7 @@
     .cta-button {
       display: block;
       padding: 12px 32px;
-      margin: 24px auto 0 auto;
+      margin: 0 auto;
       width: 100%;
       max-width: 240px;
       background: linear-gradient(135deg, #7dd3fc 0%, #34d399 100%);
