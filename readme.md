@@ -1,335 +1,239 @@
-# Composable Features for Lit (POC)
+# LitFeature
 
-This repository is a proof-of-concept that explores an ergonomics-focused alternative to deep mixin stacks when building component libraries and design systems with Lit.
+A composable feature system for Lit that enables clean, declarative composition of component behaviors without the complexity of deep mixin stacks.
 
-It sketches an API and runtime model for **“features”**: small, single-responsibility units of behavior that can be *provided* by base classes and *configured/disabled* by subclasses, while still participating in Lit’s reactive property system and lifecycle.
+**Features** are small, single-responsibility units of behavior that can be provided by base classes and configured or disabled by subclasses, while participating in Lit's reactive property system and lifecycle.
 
-## Status / Disclaimer
+## Why LitFeature?
 
-- This is a **proposal sketch**, not a PR against Lit and not intended as a drop-in production framework.
-- The implementation is intentionally small and optimized for demonstrating the desired developer experience.
-- Some behaviors in this POC differ from the “ideal” semantics (see “POC notes and gaps”).
+Building large design systems with Lit requires:
+- Composing multiple independent behaviors (ripple effects, themes, dismissal logic, etc.)
+- Enabling/disabling behaviors per component
+- Overriding defaults at different inheritance levels
+- Avoiding complex, brittle mixin stacks
 
-## Why this exists
+LitFeature provides a declarative, inheritance-aware model for composing behaviors that feels natural to Lit developers.
 
-Large design systems routinely need to:
+## Installation
 
-- Compose multiple independent behaviors (layout, focus tracking, analytics, keyboard handling…)
-- Enable/disable behaviors per component or per subtree
-- Override defaults at different points in an inheritance hierarchy
-- Avoid the complexity and brittleness of deep mixin stacks
-
-Lit already has strong composition primitives (notably `ReactiveController`), but controllers are instance-scoped and do not (today) contribute reactive property metadata to the host in a first-class way. This POC explores a “compositional inheritance” model that makes feature wiring mostly declarative.
-
-## Proposed user-facing model
-
-### Terms
-
-- **Host**: a `LitElement` (or subclass) that supports attaching features.
-- **Feature**: a class that receives a host reference + config and can:
-  - define reactive properties that become host properties
-  - run logic during host lifecycles
-  - expose methods/state via the attached feature instance
-
-### High-level API
-
-Hosts declare features using **either** static properties or decorators (both are supported):
-
-**Static property approach:**
-- `static provide` — object declaring which features this class makes available to itself and subclasses
-- `static configure` — object configuring (or disabling) inherited/provided features for this class and below
-
-**Decorator approach:**
-- `@provide(name, definition)` — equivalent to adding an entry in `static provide`
-- `@configure(name, options)` — equivalent to adding an entry in `static configure`
-
-This repo’s reference implementation is in `src/root`:
-
-- `LitCore` — a `LitElement` base class that wires features into lifecycle + property declaration
-- `FeatureManager` — collects provided features/configs across the inheritance chain and instantiates features
-- `LitFeature` — base class for features; proxies feature property access to host properties
-
-## TL;DR
-
-```ts
-import { LitCore } from "./src/root/lit-core.js";
-import { provide, configure } from "./src/root/decorators/index.js";
-
-// Base button provides styling with sensible defaults
-@provide('Style', { class: StyleFeature, config: { variant: 'outlined', size: 'medium' } })
-export class BaseButton extends LitCore {}
-
-// Primary button adds ripple effect and overrides styling
-@provide('Ripple', { class: RippleFeature, config: { duration: 300 } })
-@configure('Style', { config: { variant: 'filled', size: 'large' } })
-export class PrimaryButton extends BaseButton {
-  declare Style: StyleFeature;
-  declare Ripple: RippleFeature;
-}
+```sh
+npm install lit-feature
 ```
 
-At runtime, `PrimaryButton` instances have:
-- `this.Style` — config merged to `{ variant: 'filled', size: 'large' }`
-- `this.Ripple` — newly provided ripple behavior
-- Reactive properties from both features available on the host
+## Quick Start
 
-## Showcase demo
-
-The current demo focuses on three tiers of feature usage:
-
-- **Tier 1:** `RippleFeature` + `PulseFeature` across simple button/card/badge components
-- **Tier 2:** `ThemeFeature` across themed card/button/panel components
-- **Tier 3:** Dismiss feature inheritance (`BaseDismissFeature` → `AutoDismissFeature` → `SwipeDismissFeature`) powering three notification variants
-
-## How the POC works (today)
-
-### 1) Providing a feature
-
-Provide a feature using either static properties or decorators:
-
-**Using static property:**
+### Using Decorators (Recommended)
 
 ```ts
-import { LitCore } from "./src/root/lit-core.js";
-import { LayoutFeature } from "./src/features/layout-feature.js";
+import { LitCore } from 'lit-feature';
+import { provide, configure } from 'lit-feature/decorators';
+import { RippleFeature } from './features/ripple-feature.js';
+import { ThemeFeature } from './features/theme-feature.js';
 
-export class BaseElement extends LitCore {
+// Provide features with default configuration
+@provide('Ripple', { class: RippleFeature, config: { rippleDurationMs: 600 } })
+@provide('Theme', { class: ThemeFeature, config: { variant: 'primary' } })
+export class MyButton extends LitCore {
+  declare Ripple: RippleFeature;
+  declare Theme: ThemeFeature;
+}
+
+// Extend and override configuration
+@configure('Theme', { config: { variant: 'secondary' } })
+export class SecondaryButton extends MyButton {}
+
+// Disable inherited features
+@configure('Ripple', 'disable')
+export class StaticButton extends MyButton {}
+```
+
+### Using Static Properties
+
+```ts
+import { LitCore } from 'lit-feature';
+import { RippleFeature } from './features/ripple-feature.js';
+
+export class MyButton extends LitCore {
   static provide = {
-    Layout: {
-      class: LayoutFeature,
-      config: { layout: "classic" }
+    Ripple: {
+      class: RippleFeature,
+      config: { rippleDurationMs: 600 }
+    }
+  };
+}
+
+export class SlowRippleButton extends MyButton {
+  static configure = {
+    Ripple: {
+      config: { rippleDurationMs: 1200 }
     }
   };
 }
 ```
 
-**Using decorator:**
+## Creating a Feature
+
+Features extend `LitFeature` and can define reactive properties, lifecycle methods, and styles:
 
 ```ts
-import { LitCore } from "./src/root/lit-core.js";
-import { LayoutFeature } from "./src/features/layout-feature.js";
-import { provide } from "./src/root/decorators/index.js";
+import { LitFeature } from 'lit-feature';
+import { property } from 'lit-feature/decorators';
+import { css } from 'lit';
 
-@provide('Layout', { class: LayoutFeature, config: { layout: "classic" } })
+export class RippleFeature extends LitFeature {
+  @property({ type: Boolean, reflect: true })
+  rippling = false;
+
+  @property({ type: Number, attribute: 'ripple-duration' })
+  rippleDurationMs = 600;
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    // Host is automatically available in the feature scope
+    this.host.addEventListener('click', this.#handleClick);
+  }
+
+  #handleClick = (e: MouseEvent) => {
+    this.rippling = true;
+    setTimeout(() => {
+      this.rippling = false;
+    }, this.rippleDurationMs);
+  };
+
+  static styles = css`
+    :host([rippling]) {
+      animation: ripple-effect var(--ripple-duration, 600ms) ease-out;
+    }
+    
+    @keyframes ripple-effect {
+      0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); }
+      100% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+    }
+  `;
+}
+```
+
+## Core Concepts
+
+### Providing Features
+
+Use `@provide(name, definition)` or `static provide` to make features available on a class and its subclasses:
+
+```ts
+@provide('MyFeature', { 
+  class: MyFeatureClass, 
+  config: { /* default config */ } 
+})
 export class BaseElement extends LitCore {}
 ```
 
-**Key behavior**: the feature name (e.g. `Layout`) becomes the property name on the host used to store the instance (e.g. `this.Layout`).
+### Configuring Features
 
-It is recommended to capitalize the first letter of this name to indicate throughout the code that this is a reference to an instance of a feature.
-
-### 2) Configuring a provided feature
-
-Subclasses can override configuration using either approach:
-
-**Using static property:**
+Use `@configure(name, options)` or `static configure` to override inherited feature configuration or disable features:
 
 ```ts
-export class FancyElement extends BaseElement {
-  static configure = {
-    Layout: {
-      config: { layout: "emphasized", shape: "rounded" }
-    }
-  };
-}
+// Override configuration
+@configure('MyFeature', { config: { /* updated config */ } })
+export class CustomElement extends BaseElement {}
+
+// Disable a feature
+@configure('MyFeature', 'disable')
+export class NoFeatureElement extends BaseElement {}
 ```
 
-**Using decorator:**
+### Feature Inheritance
+
+Features themselves can extend other features, inheriting properties, styles, and lifecycle methods:
 
 ```ts
-import { configure } from "./src/root/decorators/index.js";
-
-@configure('Layout', { config: { layout: "emphasized", shape: "rounded" } })
-export class FancyElement extends BaseElement {}
-```
-
-Config objects are deep-merged (this POC uses `lodash.merge`).
-
-### 3) Disabling a feature entirely
-
-**Using static property:**
-
-```ts
-export class NoLayoutElement extends BaseElement {
-  static configure = {
-    Layout: 'disable'
-  };
-}
-```
-
-**Using decorator:**
-
-```ts
-import { configure } from "./src/root/decorators/index.js";
-
-@configure('Layout', 'disable')
-export class NoLayoutElement extends BaseElement {}
-```
-
-### 4) Disabling or overriding feature-provided reactive properties
-
-Features can contribute reactive properties (via `static get properties()` on the feature class). Hosts can optionally disable or override those property declarations:
-
-**Using static property:**
-
-```ts
-export class Element extends BaseElement {
-  static configure = {
-    Layout: {
-      properties: {
-        onDark: "disable",
-        size: { type: String, reflect: true }
-      }
-    }
-  };
-}
-```
-
-**Using decorator:**
-
-```ts
-import { configure } from "./src/root/decorators/index.js";
-
-@configure('Layout', { 
-  config: { layout: "emphasized" },
-  properties: {
-    onDark: "disable",
-    size: { type: String, reflect: true }
+export class BaseDismissFeature extends LitFeature {
+  @property({ type: Boolean }) dismissed = false;
+  
+  dismiss() {
+    this.dismissed = true;
   }
-})
-export class Element extends BaseElement {}
-```
-
-### Stacking multiple decorators
-
-Multiple `@provide` and `@configure` decorators can be stacked on a single class. Decorators apply bottom-up (closest to the class first):
-
-```ts
-import { provide, configure } from "./src/root/decorators/index.js";
-
-@provide('Focus', { class: FocusFeature })
-@provide('Counter', { class: CounterFeature, config: { start: 5 } })
-@configure('Layout', { config: { layout: 'emphasized' } })
-@configure('Counter', { config: { start: 10 } }) // overrides provided default
-export class MyElement extends LitCore {
-  declare Focus: FocusFeature;
-  declare Counter: CounterFeature;
 }
-```
 
-### 5) Using a feature instance
-
-The feature instance is attached to the host using the feature name:
-
-```js
-this.Counter.increment();
-console.log(this.hasFocus); // a reactive host property supplied by FocusFeature
-```
-
-If a host already has a property with the same name as the feature, this POC attaches the instance with an underscore prefix (e.g. `_Layout`) and logs a warning.
-
-## Authoring a feature
-
-Feature classes extend `LitFeature`.
-
-### Requirements in this POC
-
-- **Constructor**: if you define a constructor, call `super(host, config)`.
-- **Reactive properties**: define `static get properties()` just like a Lit element.
-- **Lifecycle**: if you override `updated()` or `firstUpdated()` you must call `super.updated(changedProperties)` / `super.firstUpdated(changedProperties)` so the base class can keep feature property proxies in sync.
-- **Host access**: use `this.host` to access the element.
-- **Rendering**: features do not render templates directly.
-
-Example:
-
-```js
-import { LitFeature } from "./src/root/lit-feature.js";
-
-export class FocusFeature extends LitFeature {
-  static get properties() {
-    return {
-      hasFocus: { type: Boolean, reflect: true }
-    };
-  }
-
-  constructor(host, config) {
-    super(host, config);
-    if (config.makeHostFocusable) this.host.tabIndex = 0;
-    this.hasFocus = false;
-
-    this.host.addEventListener("focus", () => (this.hasFocus = true));
-    this.host.addEventListener("blur", () => (this.hasFocus = false));
+export class AutoDismissFeature extends BaseDismissFeature {
+  @property({ type: Number }) timeout = 3000;
+  
+  connectedCallback() {
+    super.connectedCallback();
+    setTimeout(() => this.dismiss(), this.timeout);
   }
 }
 ```
 
-## Lifecycle integration
+## Available Demo Features
 
-`LitCore` forwards host lifecycle calls to every attached feature instance. Features may implement:
+This repository includes example features demonstrating different use cases:
 
-- `connectedCallback`, `disconnectedCallback`
-- `firstUpdated(changedProperties)`, `updated(changedProperties)`
+### Visual Effects
+- **RippleFeature** - Material Design ripple effect on interaction
+- **PulseFeature** - Pulsing animation for attention-grabbing
+
+### Theming
+- **ThemeFeature** - Configurable theme variants with CSS custom properties
+
+### Dismissal Patterns
+- **BaseDismissFeature** - Core dismissal behavior
+- **AutoDismissFeature** - Automatic dismissal after timeout (extends BaseDismiss)
+- **SwipeDismissFeature** - Swipe-to-dismiss with gesture tracking (extends AutoDismiss)
+
+## API Reference
+
+### Core Classes
+
+- **`LitCore`** - Base class for components that support features (extends `LitElement`)
+- **`LitFeature`** - Base class for creating features
+- **`FeatureManager`** - Internal manager for feature instantiation and lifecycle
+
+### Decorators
+
+- **`@provide(name, definition)`** - Declare a feature on a class
+- **`@configure(name, options)`** - Configure or disable an inherited feature
+- **`@property(options)`** - Re-exported Lit property decorator for use in features
+
+### Lifecycle Methods
+
+Features can implement any of these lifecycle hooks:
+- `connectedCallback()` / `disconnectedCallback()`
+- `firstUpdated(changedProperties)` / `updated(changedProperties)`
 - `attributeChangedCallback(name, oldValue, newValue)`
 
-Additionally, `LitCore` supports “around” hooks (called before/after the host’s corresponding lifecycle):
+And "around" hooks:
+- `beforeConnectedCallback()` / `afterConnectedCallback()`
+- `beforeDisconnectedCallback()` / `afterDisconnectedCallback()`
+- `beforeFirstUpdated()` / `afterFirstUpdated()`
+- `beforeUpdated()` / `afterUpdated()`
+- `beforeAttributeChangedCallback()` / `afterAttributeChangedCallback()`
 
-- `beforeConnectedCallback` / `afterConnectedCallback`
-- `beforeDisconnectedCallback` / `afterDisconnectedCallback`
-- `beforeFirstUpdated` / `afterFirstUpdated`
-- `beforeUpdated` / `afterUpdated`
-- `beforeAttributeChangedCallback` / `afterAttributeChangedCallback`
+## Documentation
 
-## POC notes and gaps (important)
+For detailed documentation, advanced patterns, and interactive examples, visit:
 
-This repo is intentionally a small POC; a production-ready version (or a core Lit integration) would want to address at least the following:
-
-1) **Feature config precedence across inheritance**
-
-The intent described by the API is “subclasses override ancestors.” The current `FeatureManager.getInheritedConfigs()` traversal/merge behavior does not consistently preserve that intent for deep-merge cases. Treat the current merge semantics as an implementation detail of the POC.
-
-2) **Disabled-by-default features and property preparation**
-
-The POC prepares feature-contributed reactive properties at finalization time, before instances exist. In the current implementation, properties are only prepared for features that are provided (not disabled).
-
-That means a “disabled-by-default, opt-in later” feature would not contribute reactive properties unless the host class enables it up-front.
-
-3) **Falsy initial values**
-
-`LitFeature` initializes internal values using `this[prop] || host[prop]`. This is convenient for demos but can behave unexpectedly for falsy values like `0`, `""`, or `false`.
-
-4) **API shape is intentionally minimal**
-
-There is no formal typing, no "feature dependencies," no ordering controls, and limited metadata available at runtime in this POC.
-
-## Relationship to existing Lit concepts
-
-- **Mixins**: great for small numbers of cross-cutting behaviors, but often become hard to reason about at scale (especially with many stacked mixins).
-- **Reactive controllers**: strong composition primitive, but currently do not contribute reactive property declarations to the host in a first-class way.
-- **Context**: solves dependency injection; this POC is focused on behavior + lifecycle + reactive property metadata.
-
-An eventual Lit-core-friendly direction could look like “controllers + declarative property contribution + inheritance-aware configuration,” which is what this POC attempts to model.
-
-## Running the demo
-
-```sh
-npm install
-npm run dev
-```
-
-Then open the Vite dev server URL and use the navigation bar to explore:
-- Home (overview)
-- Demo (showcase page)
-- Stress Test / Super Stress Test
-
-You can also jump directly to the showcase with `/#demo`.
+**[https://StephenRiosDev.github.io/LitFeature/#docs](https://StephenRiosDev.github.io/LitFeature/#docs)**
 
 ## Dependencies
 
-- `lit`
-- `lodash.merge` (used for deep-merging default config + overrides in this POC)
+- `lit` - The Lit library
+- `lodash.merge` - Deep merging for configuration
 
-## License / Attribution
+## Relationship to Lit Concepts
 
-Licensed under the Apache License, Version 2.0. See `LICENSE`.
+- **Mixins** - Great for small numbers of behaviors, but complex at scale
+- **Reactive Controllers** - Strong composition primitive; LitFeature extends this pattern with inheritance-aware configuration and declarative property contribution
+- **Context** - Solves dependency injection; LitFeature focuses on behavior composition and lifecycle
 
-If you reuse or redistribute this code, please retain the `NOTICE` file to preserve attribution.
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
+
+If you reuse or redistribute this code, please retain the [NOTICE](NOTICE) file to preserve attribution.
+
+## Contributing
+
+This is an early proof-of-concept exploring compositional patterns for Lit. Feedback and contributions are welcome!
+
+For questions, issues, or feature requests, please visit the [GitHub repository](https://github.com/StephenRiosDev/LitFeature).
